@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"strict": true,
+		"module": "es6",
+		"moduleResolution": "node",
+		"target": "es6",
+		"experimentalDecorators": true
+	},
+	"include": [
+		"**/src/**/*.ts",
+		"**.js"
+	]
+}
