@@ -2,6 +2,7 @@
 	--padding: 30px;
 	--options-height: 150px;
 	--columns-count: 4;
+	--columns-width: 1fr;
 }
 
 html,
@@ -37,7 +38,7 @@ button {
 }
 
 input {
-	width: 100%;
+	width: 50%;
 }
 
 button {
@@ -59,13 +60,29 @@ button:disabled {
 
 .columns {
 	display: grid;
-	grid-template-columns: repeat(var(--columns-count), 1fr);
+	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width));
 	grid-gap: var(--padding);
 	height: calc(100vh - var(--options-height) - var(--padding));
 	padding: 0 var(--padding);
+	overflow-x: auto;
 }
 
 .column {
 	height: 100%;
 	overflow: auto;
+
+	/* Remove scrollbar on Firefox */
+	scrollbar-width: none;
+}
+
+/* Remove scrollbar on Webkit/Blink browsers */
+.column::-webkit-scrollbar {
+	width: 0;
+}
+
+.column:first-child {
+	transform-origin: 0 0;
+	width: 500%;
+	height: 500%;
+	transform: scale(0.2);
 }

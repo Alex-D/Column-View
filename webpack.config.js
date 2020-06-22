@@ -81,7 +81,7 @@ if (process.env.NODE_ENV === 'production') {
 		],
 	}
 } else {
-	config.devtool = 'cheap-module-eval-source-map'
+	config.devtool = 'eval-cheap-module-source-map'
 }
 
 module.exports = config

@@ -3,10 +3,19 @@ import {h} from 'snabbdom/src/package/h'
 import {attributesModule} from 'snabbdom/src/package/modules/attributes'
 import {eventListenersModule} from 'snabbdom/src/package/modules/eventlisteners'
 import {VNode} from 'snabbdom/src/package/vnode'
+import {throttle} from 'lodash-es'
+
+const DEFAULT_COLUMNS_COUNT = 4
+const MIN_COLUMNS_COUNT = 1
+const MAX_COLUMNS_COUNT = 10
+const DEFAULT_COLUMNS_WIDTH = 420
+const MIN_COLUMNS_WIDTH = 320
+const MAX_COLUMNS_WIDTH = 4000
 
 interface State {
 	url: string,
 	columnsCount: number,
+	columnsWidth: number,
 }
 
 interface DOMEvent<T extends EventTarget> extends Event {
@@ -19,17 +28,23 @@ const patch = init([
 ])
 
 const urlSearchParams = new URLSearchParams(window.location.search)
-const url = urlSearchParams.get('url') || ''
-const columnsCount: number = parseInt(urlSearchParams.get('columnsCount') || '4')
+const getUrlSearchParam = (key: string): string => {
+	return urlSearchParams.get(key) || ''
+}
+
+const url = getUrlSearchParam('url')
+const columnsCount: number = parseInt(getUrlSearchParam('columnsCount')) || DEFAULT_COLUMNS_COUNT
+const columnsWidth: number = parseInt(getUrlSearchParam('columnsWidth')) || DEFAULT_COLUMNS_WIDTH
 const app = document.getElementById('app')
 
-const state = {
+const state: State = {
 	url,
 	columnsCount,
+	columnsWidth,
 }
 
 let scrollingSourceIndex: number | undefined
-let scrollingSourceTimeout: NodeJS.Timeout
+let scrollingSourceTimeout: number | undefined
 
 function scroll(columnIndex: number): void {
 	if (scrollingSourceIndex !== undefined && scrollingSourceIndex !== columnIndex) {
@@ -51,7 +66,7 @@ function scroll(columnIndex: number): void {
 	})
 
 	clearTimeout(scrollingSourceTimeout)
-	scrollingSourceTimeout = setTimeout(() => {
+	scrollingSourceTimeout = window.setTimeout(() => {
 		scrollingSourceIndex = undefined
 	}, 100)
 }
@@ -61,23 +76,31 @@ function updateHistory(state: State): void {
 	const searchParams = new URLSearchParams()
 	searchParams.set('url', state.url)
 	searchParams.set('columnsCount', state.columnsCount.toString())
+	searchParams.set('columnsWidth', state.columnsWidth.toString())
 	const newUrl = `${baseUrl}?${searchParams.toString()}`
 
 	window.history.replaceState(null, '', newUrl)
 }
 
-function setColumnsCount(newColumnsCount: number): void {
+const setColumnsCount = throttle((newColumnsCount: number): void => {
 	state.columnsCount = newColumnsCount
 	updateHistory(state)
 	render(state)
-}
+}, 100)
 
-function onUrlChange(e: Event): void {
+const onUrlChange = throttle((e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
 	state.url = event.target.value
 	updateHistory(state)
 	render(state)
-}
+}, 100)
+
+const onColumnsWidthChange = throttle((e: Event): void => {
+	const event = e as DOMEvent<HTMLInputElement>
+	state.columnsWidth = parseInt(event.target.value)
+	updateHistory(state)
+	render(state)
+}, 100)
 
 function view(state: State): VNode {
 	const columns = [...Array<null>(state.columnsCount)].map((_, index) => {
@@ -92,21 +115,25 @@ function view(state: State): VNode {
 		)
 	})
 
-	return h('div#app', {attrs: {style: `--columns-count: ${state.columnsCount}`}}, [
+	return h('div#app', {attrs: {style: `--columns-count: ${state.columnsCount}; --columns-width: ${state.columnsWidth}px`}}, [
 		h('div.options', [
 			h('div.field', [
 				h('input', {attrs: {type: 'url', name: 'url', id: 'url', value: state.url}, on: {change: onUrlChange}}),
+				h('input', {
+					attrs: {type: 'number', name: 'columnsWidth', id: 'columnsWidth', min: MIN_COLUMNS_WIDTH, max: MAX_COLUMNS_WIDTH, value: state.columnsWidth},
+					on: {change: onColumnsWidthChange},
+				}),
 			]),
 			h('div.field', [
 				h('button', {
 					// @ts-ignore: Wrong typing in Snabbdom lib
 					on: {click: [setColumnsCount, state.columnsCount + 1]},
-					attrs: {disabled: state.columnsCount >= 10},
+					attrs: {disabled: state.columnsCount >= MAX_COLUMNS_COUNT},
 				}, 'Add a column'),
 				h('button', {
 					// @ts-ignore: Wrong typing in Snabbdom lib
 					on: {click: [setColumnsCount, state.columnsCount - 1]},
-					attrs: {disabled: state.columnsCount <= 1},
+					attrs: {disabled: state.columnsCount <= MIN_COLUMNS_COUNT},
 				}, 'Remove a column'),
 			]),
 		]),
