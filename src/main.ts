@@ -16,6 +16,7 @@ interface State {
 	url: string,
 	columnsCount: number,
 	columnsWidth: number,
+	hasNavColumn: boolean,
 }
 
 interface DOMEvent<T extends EventTarget> extends Event {
@@ -32,37 +33,53 @@ const getUrlSearchParam = (key: string): string => {
 	return urlSearchParams.get(key) || ''
 }
 
-const url = getUrlSearchParam('url')
+const url: string = getUrlSearchParam('url')
 const columnsCount: number = parseInt(getUrlSearchParam('columnsCount')) || DEFAULT_COLUMNS_COUNT
 const columnsWidth: number = parseInt(getUrlSearchParam('columnsWidth')) || DEFAULT_COLUMNS_WIDTH
-const app = document.getElementById('app')
+const hasNavColumn = true
+const app: HTMLElement = document.getElementById('app') as HTMLElement
 
 const state: State = {
 	url,
 	columnsCount,
 	columnsWidth,
+	hasNavColumn,
 }
 
 let scrollingSourceIndex: number | undefined
 let scrollingSourceTimeout: number | undefined
 
 function scroll(columnIndex: number): void {
+	const columns = document.querySelectorAll('.column:not(.nav-column)')
+	const scrollTop = Math.max(0, columns[columnIndex].scrollTop)
+	const columnHeight = columns[columnIndex].getBoundingClientRect().height
+	const minScrollTop = columnHeight * columnIndex
+
 	if (scrollingSourceIndex !== undefined && scrollingSourceIndex !== columnIndex) {
 		return
 	}
 
-	scrollingSourceIndex = columnIndex
+	if (scrollTop < minScrollTop) {
+		columns[columnIndex].scrollTop = minScrollTop
 
-	const columns = document.querySelectorAll('.column')
-	const scrollTop = columns[columnIndex].scrollTop
-	const columnHeight = columns[columnIndex].getBoundingClientRect().height
+		columns.forEach((column, index) => {
+			// Set the computed minScrollTop for each column
+			column.scrollTop = columnHeight * index
+		})
+
+		return
+	}
+
+	scrollingSourceIndex = columnIndex
 
 	columns.forEach((column, index) => {
 		if (index === columnIndex) {
 			return
 		}
 
-		column.scrollTop = scrollTop + columnHeight * (index - columnIndex)
+		const newScrollTop = scrollTop + columnHeight * (index - columnIndex)
+
+		column.scrollTop = newScrollTop
 	})
 
 	clearTimeout(scrollingSourceTimeout)
@@ -103,7 +120,7 @@ const onColumnsWidthChange = throttle((e: Event): void => {
 }, 100)
 
 function view(state: State): VNode {
-	const columns = [...Array<null>(state.columnsCount)].map((_, index) => {
+	const columns: VNode[] = [...Array<null>(state.columnsCount)].map((_, index) => {
 		return h('div.column',
 			{
 				// @ts-ignore: Wrong typing in Snabbdom lib
@@ -114,6 +131,19 @@ function view(state: State): VNode {
 			],
 		)
 	})
+
+	if (state.hasNavColumn) {
+		// Add nav column
+		columns.unshift(
+			h('div.column.nav-column',
+				[
+					h('div.nav-column--container', {},[
+						h('iframe', {attrs: {src: state.url, frameborder: '0', scrolling: 'no'}}),
+					]),
+				],
+			)
+		)
+	}
 
 	return h('div#app', {attrs: {style: `--columns-count: ${state.columnsCount}; --columns-width: ${state.columnsWidth}px`}}, [
 		h('div.options', [

@@ -65,10 +65,11 @@ button:disabled {
 	height: calc(100vh - var(--options-height) - var(--padding));
 	padding: 0 var(--padding);
 	overflow-x: auto;
+	overflow-y: hidden;
 }
 
 .column {
-	height: 100%;
+	height: calc(100vh - var(--options-height) - var(--padding));
 	overflow: auto;
 
 	/* Remove scrollbar on Firefox */
@@ -80,7 +81,7 @@ button:disabled {
 	width: 0;
 }
 
-.column:first-child {
+.nav-column--container {
 	transform-origin: 0 0;
 	width: 500%;
 	height: 500%;
