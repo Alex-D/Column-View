@@ -4,6 +4,7 @@ import {attributesModule} from 'snabbdom/src/package/modules/attributes'
 import {eventListenersModule} from 'snabbdom/src/package/modules/eventlisteners'
 import {VNode} from 'snabbdom/src/package/vnode'
 import {throttle} from 'lodash-es'
+import {v4 as uuid} from 'uuid'
 
 const DEFAULT_COLUMNS_COUNT = 4
 const MIN_COLUMNS_COUNT = 1
@@ -17,6 +18,7 @@ interface State {
 	columnsCount: number,
 	columnsWidth: number,
 	hasNavColumn: boolean,
+	loadedIframeIds: Set<string>,
 }
 
 interface DOMEvent<T extends EventTarget> extends Event {
@@ -44,6 +46,7 @@ const state: State = {
 	columnsCount,
 	columnsWidth,
 	hasNavColumn,
+	loadedIframeIds: new Set<string>(),
 }
 
 let scrollingSourceIndex: number | undefined
@@ -119,15 +122,38 @@ const onColumnsWidthChange = throttle((e: Event): void => {
 	render(state)
 }, 100)
 
+const onIframeLoad = (e: Event): void => {
+	const iframe = e.target as HTMLIFrameElement
+
+	if (iframe.src === undefined) {
+		return
+	}
+
+	if (!state.loadedIframeIds.has(iframe.id)) {
+		state.loadedIframeIds.add(iframe.id)
+		return
+	}
+
+	state.loadedIframeIds.delete(iframe.id)
+	iframe.src = state.url
+}
+
 function view(state: State): VNode {
 	const columns: VNode[] = [...Array<null>(state.columnsCount)].map((_, index) => {
 		return h('div.column',
 			{
-				// @ts-ignore: Wrong typing in Snabbdom lib
-				on: {scroll: [scroll, index]},
+				on: {
+					// @ts-ignore: Wrong typing in Snabbdom lib
+					scroll: [scroll, index],
+				},
 			},
 			[
-				h('iframe', {attrs: {src: state.url, frameborder: '0', scrolling: 'no'}}),
+				h('iframe', {
+					attrs: {src: state.url, id: uuid(), frameborder: '0', scrolling: 'no'},
+					on: {
+						load: onIframeLoad,
+					},
+				}),
 			],
 		)
 	})
@@ -138,7 +164,7 @@ function view(state: State): VNode {
 			h('div.column.nav-column',
 				[
 					h('div.nav-column--container', {},[
-						h('iframe', {attrs: {src: state.url, frameborder: '0', scrolling: 'no'}}),
+						h(`iframe`, {attrs: {src: state.url, frameborder: '0', scrolling: 'no'}}),
 					]),
 				],
 			)
@@ -159,12 +185,13 @@ function view(state: State): VNode {
 					// @ts-ignore: Wrong typing in Snabbdom lib
 					on: {click: [setColumnsCount, state.columnsCount + 1]},
 					attrs: {disabled: state.columnsCount >= MAX_COLUMNS_COUNT},
-				}, 'Add a column'),
+				}, '+'),
+				h('span.column-count', state.columnsCount),
 				h('button', {
 					// @ts-ignore: Wrong typing in Snabbdom lib
 					on: {click: [setColumnsCount, state.columnsCount - 1]},
 					attrs: {disabled: state.columnsCount <= MIN_COLUMNS_COUNT},
-				}, 'Remove a column'),
+				}, '-'),
 			]),
 		]),
 		h('div.columns', columns),

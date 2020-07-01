@@ -58,11 +58,15 @@ button:disabled {
 	padding: var(--padding);
 }
 
+.column-count {
+	margin-right: 15px;
+}
+
 .columns {
 	display: grid;
 	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width));
 	grid-gap: var(--padding);
-	height: calc(100vh - var(--options-height) - var(--padding));
+	height: calc(100vh - var(--options-height));
 	padding: 0 var(--padding);
 	overflow-x: auto;
 	overflow-y: hidden;
@@ -86,4 +90,8 @@ button:disabled {
 	width: 500%;
 	height: 500%;
 	transform: scale(0.2);
+}
+
+.nav-column--container iframe {
+	pointer-events: none;
 }
