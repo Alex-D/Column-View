@@ -4,7 +4,10 @@
 const path = require('path')
 const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 
 const config = {
@@ -14,12 +17,12 @@ const config = {
 		ignored: /node_modules/,
 	},
 	entry: {
-		main: ['./src/main.ts'],
+		main: ['./src/main.ts', './src/style.css'],
 	},
 	output: {
+		filename: '[name].[hash].js',
 		path: path.resolve(__dirname, 'dist'),
 		publicPath: '/',
-		filename: 'main.js',
 	},
 	resolve: {
 		extensions: ['.js', '.ts'],
@@ -38,7 +41,6 @@ const config = {
 			patterns:
 				[
 					{ from: './src/index.html' },
-					{ from: './src/style.css' },
 				],
 		}),
 		new ForkTsCheckerWebpackPlugin({
@@ -47,6 +49,14 @@ const config = {
 				files: './src/**/*.{js,ts}',
 			},
 		}),
+		new MiniCssExtractPlugin({
+			filename: "style.[contenthash].css",
+			chunkFilename: "[id].css",
+		}),
+		new HtmlWebpackPlugin({
+			template: './src/index.html',
+		}),
+		new CleanWebpackPlugin(),
 		new webpack.DefinePlugin({
 			'process.env': {
 				NODE_ENV: JSON.stringify(process.env.NODE_ENV),
@@ -66,7 +76,16 @@ const config = {
 				}],
 			},
 			{
-				test: /\.(png|jpe?g|gif|woff2?|eot|ttf|otf|svg|wav)(\?.*)?$/,
+				test: /\.css$/,
+				use: [
+					process.env.NODE_ENV === 'production'
+						? MiniCssExtractPlugin.loader
+						: 'style-loader',
+					'css-loader',
+				],
+			},
+			{
+				test: /\.(png|jpe?g|gif|svg|woff2?)(\?.*)?$/,
 				use: 'url-loader',
 			},
 		],
