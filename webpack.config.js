@@ -22,7 +22,7 @@ const config = {
 	output: {
 		filename: '[name].[hash].js',
 		path: path.resolve(__dirname, 'dist'),
-		publicPath: '/',
+		publicPath: './',
 	},
 	resolve: {
 		extensions: ['.js', '.ts'],
