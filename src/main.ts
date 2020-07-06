@@ -7,14 +7,15 @@ import {throttle} from 'lodash-es'
 import {v4 as uuid} from 'uuid'
 
 const DEFAULT_DISPLAY_MODE = 'single-page'
-const DEFAULT_COLUMNS_COUNT = 4
+const DEFAULT_COLUMNS_COUNT = 5
 const MIN_COLUMNS_COUNT = 1
 const MAX_COLUMNS_COUNT = 10
-const DEFAULT_COLUMNS_WIDTH = 420
+const DEFAULT_COLUMNS_WIDTH = 380
 const MIN_COLUMNS_WIDTH = 320
 const MAX_COLUMNS_WIDTH = 4000
 
 type DisplayMode = 'single-page' | 'multi-page'
+type IconId = 'column-count' | 'screen-size' | 'url' | 'type'
 
 interface State {
 	displayMode: DisplayMode,
@@ -113,6 +114,12 @@ const setColumnsCount = throttle((newColumnsCount: number): void => {
 	state.columnsCount = newColumnsCount
 	updateHistory(state)
 	render(state)
+
+	// Avoid outline on current activeElement without breaking accessibility
+	const activeElement: Element | null = document.activeElement
+	if (activeElement !== null) {
+		(activeElement as HTMLElement).blur()
+	}
 }, 100)
 
 const onUrlChange = throttle((e: Event): void => {
@@ -151,6 +158,16 @@ const onIframeLoad = (e: Event): void => {
 	iframe.src = state.url
 }
 
+function icon(iconId: IconId): VNode {
+	return h('svg.icon', [
+		h('use', {
+			attrs: {
+				'xlink:href': `#icon-${iconId}`,
+			},
+		}),
+	])
+}
+
 function view(state: State): VNode {
 	const columns: VNode[] = [...Array<null>(state.columnsCount)].map((_, index) => {
 		return h('div.column',
@@ -161,7 +178,7 @@ function view(state: State): VNode {
 				},
 			},
 			[
-				h('iframe', {
+				state.url && h('iframe', {
 					attrs: {src: state.url, id: uuid(), frameborder: '0', scrolling: 'no'},
 					on: {
 						load: onIframeLoad,
@@ -170,6 +187,8 @@ function view(state: State): VNode {
 			],
 		)
 	})
+
+	columns.push(h('div.fix-for-horizontal-scroll-right-padding'))
 
 	if (state.hasNavColumn) {
 		// Add nav column
@@ -188,7 +207,9 @@ function view(state: State): VNode {
 		h('header', [
 			h('h1.header-block.header-logo', 'Column View'),
 			h('div.header-block', [
-				h('div.header-block--icon', []),
+				h('div.header-block--icon', [
+					icon('type'),
+				]),
 				h('div.header-block--content', [
 					h('div.header-block--title', 'Type'),
 					h('div.header-switch', [
@@ -204,7 +225,7 @@ function view(state: State): VNode {
 								change: onDisplayModeChange,
 							},
 						}),
-						h('label.header-switch--item', {attrs: {for: 'switch-single-page'}},  [
+						h('label.header-switch--item', {attrs: {for: 'switch-single-page'}}, [
 							'Single page',
 						]),
 						h('input.header-switch--radio', {
@@ -226,49 +247,73 @@ function view(state: State): VNode {
 				]),
 			]),
 			h('div.header-block', [
-				h('div.header-block--icon', []),
+				h('div.header-block--icon', [
+					icon('url'),
+				]),
 				h('div.header-block--content', [
 					h('label.header-block--title', {
 						attrs: {for: 'url'},
 					}, 'URL'),
-					h('input', {
-						attrs: {type: 'url', name: 'url', id: 'url', value: state.url},
-						on: {change: onUrlChange},
-					}),
+					h('div.header-block--field', [
+						h('input', {
+							attrs: {
+								type: 'url',
+								name: 'url',
+								id: 'url',
+								value: state.url,
+								placeholder: 'https://example.com',
+							},
+							on: {change: onUrlChange},
+						}),
+					]),
 				]),
 			]),
 			h('div.header-block', [
-				h('div.header-block--icon', []),
+				h('div.header-block--icon', [
+					icon('column-count'),
+				]),
 				h('div.header-block--content', [
 					h('div.header-block--title', 'Column count'),
-					h('button', {
-						// @ts-ignore: Wrong typing in Snabbdom lib
-						on: {click: [setColumnsCount, state.columnsCount - 1]},
-						attrs: {disabled: state.columnsCount <= MIN_COLUMNS_COUNT},
-					}, '-'),
-					h('span.column-count', state.columnsCount),
-					h('button', {
-						// @ts-ignore: Wrong typing in Snabbdom lib
-						on: {click: [setColumnsCount, state.columnsCount + 1]},
-						attrs: {disabled: state.columnsCount >= MAX_COLUMNS_COUNT},
-					}, '+'),
+					h('div.header-block--field', [
+						h('button', {
+							// @ts-ignore: Wrong typing in Snabbdom lib
+							on: {click: [setColumnsCount, state.columnsCount - 1]},
+							attrs: {disabled: state.columnsCount <= MIN_COLUMNS_COUNT},
+						}, '−'),
+						h('span.column-count', state.columnsCount),
+						h('button', {
+							// @ts-ignore: Wrong typing in Snabbdom lib
+							on: {click: [setColumnsCount, state.columnsCount + 1]},
+							attrs: {disabled: state.columnsCount >= MAX_COLUMNS_COUNT},
+						}, '+'),
+					]),
 				]),
 			]),
 			h('div.header-block', [
-				h('div.header-block--icon', []),
+				h('div.header-block--icon', [
+					icon('screen-size'),
+				]),
 				h('div.header-block--content', [
-					h('div.header-block--title', 'Screen size'),
-					h('input', {
+					h('label.header-block--title', {
+						attrs: {for: 'columnsWidth'},
+					}, 'Screen size'),
+					h('div.header-block--field.header-block--field-screen-size', {
 						attrs: {
-							type: 'number',
-							name: 'columnsWidth',
-							id: 'columnsWidth',
-							min: MIN_COLUMNS_WIDTH,
-							max: MAX_COLUMNS_WIDTH,
-							value: state.columnsWidth,
+							'data-unit': 'px',
 						},
-						on: {change: onColumnsWidthChange},
-					}),
+					},[
+						h('input', {
+							attrs: {
+								type: 'number',
+								name: 'columnsWidth',
+								id: 'columnsWidth',
+								min: MIN_COLUMNS_WIDTH,
+								max: MAX_COLUMNS_WIDTH,
+								value: state.columnsWidth,
+							},
+							on: {change: onColumnsWidthChange},
+						}),
+					]),
 				]),
 			]),
 		]),

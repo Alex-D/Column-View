@@ -3,7 +3,6 @@
 
 const path = require('path')
 const webpack = require('webpack')
-const CopyWebpackPlugin = require('copy-webpack-plugin')
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -30,19 +29,11 @@ const config = {
 	devServer: {
 		overlay: true,
 		contentBase: path.resolve(__dirname, 'dist'),
-		allowedHosts: [
-			'localhost',
-		],
 		host: '0.0.0.0',
 		port: 8080,
+		publicPath: '/',
 	},
 	plugins: [
-		new CopyWebpackPlugin({
-			patterns:
-				[
-					{ from: './src/index.html' },
-				],
-		}),
 		new ForkTsCheckerWebpackPlugin({
 			eslint: {
 				enabled: true,
