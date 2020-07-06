@@ -3,7 +3,7 @@
 
 const path = require('path')
 const webpack = require('webpack')
-const {CleanWebpackPlugin} = require('clean-webpack-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
@@ -16,7 +16,8 @@ const config = {
 		ignored: /node_modules/,
 	},
 	entry: {
-		main: ['./src/main.ts', './src/style.css'],
+		main: './src/main.ts',
+		styles: './src/style.css',
 	},
 	output: {
 		filename: '[name].[hash].js',
@@ -41,8 +42,8 @@ const config = {
 			},
 		}),
 		new MiniCssExtractPlugin({
-			filename: "style.[contenthash].css",
-			chunkFilename: "[id].css",
+			filename: 'style.[contenthash].css',
+			chunkFilename: '[id].css',
 		}),
 		new HtmlWebpackPlugin({
 			template: './src/index.html',
@@ -76,8 +77,14 @@ const config = {
 				],
 			},
 			{
-				test: /\.(png|jpe?g|gif|svg|woff2?)(\?.*)?$/,
-				use: 'url-loader',
+				test: /\.woff2$/,
+				use: {
+					loader: 'file-loader',
+					options: {
+						name: '[name].[ext]',
+						outputPath: 'fonts/',
+					},
+				},
 			},
 		],
 	},

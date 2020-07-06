@@ -22,6 +22,8 @@ interface State {
 	url: string,
 	columnsCount: number,
 	columnsWidth: number,
+	columnsHeight: number,
+	scrollTop: number,
 	hasNavColumn: boolean,
 	loadedIframeIds: Set<string>,
 }
@@ -52,6 +54,8 @@ const state: State = {
 	url,
 	columnsCount,
 	columnsWidth,
+	columnsHeight: 0,
+	scrollTop: 0,
 	hasNavColumn,
 	loadedIframeIds: new Set<string>(),
 }
@@ -62,8 +66,8 @@ let scrollingSourceTimeout: number | undefined
 function scroll(columnIndex: number): void {
 	const columns = document.querySelectorAll('.column:not(.nav-column)')
 	const scrollTop = Math.max(0, columns[columnIndex].scrollTop)
-	const columnHeight = columns[columnIndex].getBoundingClientRect().height
-	const minScrollTop = columnHeight * columnIndex
+	const columnsHeight = columns[columnIndex].getBoundingClientRect().height
+	const minScrollTop = columnsHeight * columnIndex
 
 	if (scrollingSourceIndex !== undefined && scrollingSourceIndex !== columnIndex) {
 		return
@@ -74,7 +78,7 @@ function scroll(columnIndex: number): void {
 
 		columns.forEach((column, index) => {
 			// Set the computed minScrollTop for each column
-			column.scrollTop = columnHeight * index
+			column.scrollTop = columnsHeight * index
 		})
 
 		return
@@ -87,7 +91,7 @@ function scroll(columnIndex: number): void {
 			return
 		}
 
-		const newScrollTop = scrollTop + columnHeight * (index - columnIndex)
+		const newScrollTop = scrollTop + columnsHeight * (index - columnIndex)
 
 		column.scrollTop = newScrollTop
 	})
@@ -96,6 +100,9 @@ function scroll(columnIndex: number): void {
 	scrollingSourceTimeout = window.setTimeout(() => {
 		scrollingSourceIndex = undefined
 	}, 100)
+
+	const navScrollTop = Math.max(0, columns[0].scrollTop)
+	app.setAttribute('style',  `--columns-height: ${columnsHeight}px; --scroll-top: ${navScrollTop}px`)
 }
 
 function updateHistory(state: State): void {
@@ -124,9 +131,20 @@ const setColumnsCount = throttle((newColumnsCount: number): void => {
 
 const onUrlChange = throttle((e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
-	state.url = event.target.value
+	event.target.blur()
+
+	// Prefix with https:// when needed
+	let url = event.target.value
+	if (!url.startsWith('http')) {
+		url = 'https://' + url
+	}
+
+	state.url = url
 	updateHistory(state)
 	render(state)
+
+	// Force value update
+	event.target.value = url
 }, 100)
 
 const onColumnsWidthChange = throttle((e: Event): void => {
@@ -188,22 +206,35 @@ function view(state: State): VNode {
 		)
 	})
 
+	// Hack to get the right right padding value
 	columns.push(h('div.fix-for-horizontal-scroll-right-padding'))
 
-	if (state.hasNavColumn) {
+	// Show nav column
+	if (state.displayMode === 'single-page') {
+		const navColumnPlaceholders: VNode[] = [...Array<null>(state.columnsCount)].map(() => {
+			return h('div.nav-column--placeholder')
+		})
+
 		// Add nav column
 		columns.unshift(
 			h('div.column.nav-column',
 				[
 					h('div.nav-column--container', [
-						h(`iframe`, {attrs: {src: state.url, frameborder: '0', scrolling: 'no'}}),
+						h(`iframe`, {
+							attrs: {
+								src: state.url,
+								frameborder: '0',
+								scrolling: 'no',
+							},
+						}),
+						h('div.nav-column--placeholders', navColumnPlaceholders),
 					]),
 				],
 			),
 		)
 	}
 
-	return h('div#app', {attrs: {style: `--columns-count: ${state.columnsCount}; --columns-width: ${state.columnsWidth}px`}}, [
+	return h('div#app', [
 		h('header', [
 			h('h1.header-block.header-logo', 'Column View'),
 			h('div.header-block', [
@@ -301,7 +332,7 @@ function view(state: State): VNode {
 						attrs: {
 							'data-unit': 'px',
 						},
-					},[
+					}, [
 						h('input', {
 							attrs: {
 								type: 'number',
@@ -317,13 +348,17 @@ function view(state: State): VNode {
 				]),
 			]),
 		]),
-		h('div.columns', columns),
+		h('div.columns', {
+			attrs: {
+				style: `--columns-count: ${state.columnsCount}; --columns-width: ${state.columnsWidth}px`,
+			},
+		}, columns),
 	])
 }
 
 let oldVNode: VNode
 
-function render(state: State) {
+function render(state: State): void {
 	const newVNode = view(state)
 	patch(oldVNode || app, newVNode)
 	oldVNode = newVNode
@@ -332,5 +367,9 @@ function render(state: State) {
 		scroll(0)
 	})
 }
+
+const throttledRender = throttle(render, 50)
+
+window.addEventListener('resize', () => throttledRender(state))
 
 render(state)

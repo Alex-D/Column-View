@@ -4,6 +4,7 @@
 	--columns-count: 4;
 	--columns-width: 1fr;
 	--letter-spacing: 6px;
+	--columns-height: 100px;
 }
 
 @font-face {
@@ -75,7 +76,7 @@ input[type="url"] {
 }
 
 /* Hack for Blink browsers to vertical align text correctly */
-@media all and (-webkit-min-device-pixel-ratio:0) and (min-resolution: .001dpcm) {
+@media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
 	input[type="number"],
 	input[type="url"] {
 		padding: 9.4px 8px 6.6px;
@@ -90,6 +91,14 @@ input::-webkit-inner-spin-button {
 input[type="number"]:focus,
 input[type="url"]:focus {
 	outline: 1px solid #dc9999;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+	caret-color: #ffffff;
+	-webkit-text-fill-color: #ffffff;
+	-webkit-box-shadow: 0 0 0px 1000px #19191a inset;
 }
 
 button {
@@ -173,15 +182,15 @@ button:disabled {
 	margin-top: 8px;
 }
 
-.header-block--field button:hover {
+.header-block--field button:not(:disabled):hover {
 	outline: 1px solid #dc9999;
 }
 
 .header-switch {
 	position: absolute;
-	right: 0;
-	bottom: 0;
-	left: 0;
+	right: -1px;
+	bottom: -1px;
+	left: -1px;
 }
 
 .header-switch--item {
@@ -190,16 +199,12 @@ button:disabled {
 	width: 50%;
 	padding: 15px 15px 13px;
 	font-size: 16px;
-	border-top: 1px solid #dc9999;
+	border: 1px solid #dc9999;
 	opacity: 0.5;
 }
 
 input:checked + .header-switch--item {
 	opacity: 1;
-}
-
-.header-switch--item:not(:last-child) {
-	border-right: 1px solid #dc9999;
 }
 
 .header-switch--radio {
@@ -213,12 +218,38 @@ input:checked + .header-switch--item {
 
 .columns {
 	display: grid;
-	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width)) 1px;
+	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width)) 1px; /* 1px is for the last column padding-right fix */
 	grid-gap: var(--padding);
 	height: calc(100vh - var(--options-height));
 	padding: 0 var(--padding);
 	overflow-x: auto;
 	overflow-y: hidden;
+
+	/* Custom scrollbar for Firefox */
+	scrollbar-color: #dc9999 #19191a;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar {
+	width: 16px;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-track {
+	background: #19191a;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-thumb {
+	background: #dc9999;
+	border: 0 solid #19191a;
+	border-right-width: 24px;
+	border-left-width: 23px;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-thumb:hover {
+	background: #dc9999cc;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
+	background: #dc999999;
 }
 
 .column {
@@ -226,11 +257,14 @@ input:checked + .header-switch--item {
 	height: calc(100vh - var(--options-height) - var(--padding));
 	overflow: auto;
 	border: 1px solid #dc9999;
-	/* diagonal line */
-	background-image: linear-gradient(to top left, #dc999900 0%, #dc999900 calc(50% - 1px), #dc9999 50%, #dc999900 calc(50% + 1px), #dc999900 100%);
 
 	/* Remove scrollbar on Firefox */
 	scrollbar-width: none;
+}
+
+.column:empty {
+	/* diagonal line */
+	background-image: linear-gradient(to top left, #dc999900 0%, #dc999900 calc(50% - 1px), #dc9999 50%, #dc999900 calc(50% + 1px), #dc999900 100%);
 }
 
 /* Remove scrollbar on Webkit/Blink browsers */
@@ -249,13 +283,22 @@ input:checked + .header-switch--item {
 	pointer-events: none;
 }
 
-#svg-sprite {
-	display: block;
+.nav-column--placeholders {
 	position: absolute;
 	top: 0;
+	right: 0;
+	bottom: 0;
 	left: 0;
-	width: 0;
-	height: 0;
-	opacity: 0;
-	overflow: hidden;
+	transform: translateY(var(--scroll-top));
+}
+
+.nav-column--placeholder {
+	width: 100%;
+	height: var(--columns-height);
+	background: #dc9999;
+	opacity: 0.6;
+}
+
+.nav-column--placeholder:nth-child(2n) {
+	opacity: 0.3;
 }
