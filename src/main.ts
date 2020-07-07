@@ -20,6 +20,7 @@ type IconId = 'column-count' | 'screen-size' | 'url' | 'type'
 interface State {
 	displayMode: DisplayMode,
 	url: string,
+	urls: string[],
 	columnsCount: number,
 	columnsWidth: number,
 	columnsHeight: number,
@@ -44,6 +45,7 @@ const getUrlSearchParam = (key: string): string => {
 
 const displayMode: DisplayMode = getUrlSearchParam('displayMode') as DisplayMode || DEFAULT_DISPLAY_MODE
 const url: string = getUrlSearchParam('url')
+const urls: string[] = urlSearchParams.getAll('urls') || []
 const columnsCount: number = parseInt(getUrlSearchParam('columnsCount')) || DEFAULT_COLUMNS_COUNT
 const columnsWidth: number = parseInt(getUrlSearchParam('columnsWidth')) || DEFAULT_COLUMNS_WIDTH
 const hasNavColumn = true
@@ -52,6 +54,7 @@ const app: HTMLElement = document.getElementById('app') as HTMLElement
 const state: State = {
 	displayMode,
 	url,
+	urls,
 	columnsCount,
 	columnsWidth,
 	columnsHeight: 0,
@@ -63,31 +66,39 @@ const state: State = {
 let scrollingSourceIndex: number | undefined
 let scrollingSourceTimeout: number | undefined
 
-function scroll(columnIndex: number): void {
+function scroll(state: State, columnIndex: number): void {
 	const columns = document.querySelectorAll('.column:not(.nav-column)')
 	const scrollTop = Math.max(0, columns[columnIndex].scrollTop)
 	const columnsHeight = columns[columnIndex].getBoundingClientRect().height
-	const minScrollTop = columnsHeight * columnIndex
 
 	if (scrollingSourceIndex !== undefined && scrollingSourceIndex !== columnIndex) {
 		return
 	}
 
-	if (scrollTop < minScrollTop) {
-		columns[columnIndex].scrollTop = minScrollTop
+	if (state.displayMode === 'single-page') {
+		const minScrollTop = columnsHeight * columnIndex
 
-		columns.forEach((column, index) => {
+		if (scrollTop < minScrollTop) {
+			columns[columnIndex].scrollTop = minScrollTop
+
 			// Set the computed minScrollTop for each column
-			column.scrollTop = columnsHeight * index
-		})
+			columns.forEach((column, index) => {
+				column.scrollTop = columnsHeight * index
+			})
 
-		return
+			return
+		}
 	}
 
 	scrollingSourceIndex = columnIndex
 
 	columns.forEach((column, index) => {
 		if (index === columnIndex) {
+			return
+		}
+
+		if (state.displayMode === 'multi-page') {
+			column.scrollTop = scrollTop
 			return
 		}
 
@@ -109,7 +120,13 @@ function updateHistory(state: State): void {
 	const baseUrl = window.location.origin + window.location.pathname
 	const searchParams = new URLSearchParams()
 	searchParams.set('displayMode', state.displayMode)
-	searchParams.set('url', state.url)
+	if (state.displayMode === 'single-page') {
+		searchParams.set('url', state.url)
+	} else {
+		state.urls.forEach((url) => {
+			searchParams.append('urls', url)
+		})
+	}
 	searchParams.set('columnsCount', state.columnsCount.toString())
 	searchParams.set('columnsWidth', state.columnsWidth.toString())
 	const newUrl = `${baseUrl}?${searchParams.toString()}`
@@ -129,7 +146,7 @@ const setColumnsCount = throttle((newColumnsCount: number): void => {
 	}
 }, 100)
 
-const onUrlChange = throttle((e: Event): void => {
+const onUrlChange = throttle((state: State, index: number | null, e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
 	event.target.blur()
 
@@ -139,7 +156,11 @@ const onUrlChange = throttle((e: Event): void => {
 		url = 'https://' + url
 	}
 
-	state.url = url
+	if (index === null) {
+		state.url = url
+	} else {
+		state.urls[index] = url
+	}
 	updateHistory(state)
 	render(state)
 
@@ -158,9 +179,10 @@ const onDisplayModeChange = (e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
 	state.displayMode = event.target.value as DisplayMode
 	updateHistory(state)
+	render(state)
 }
 
-const onIframeLoad = (e: Event): void => {
+const onIframeLoad = (state: State, index: number | null, e: Event): void => {
 	const iframe = e.target as HTMLIFrameElement
 
 	if (iframe.src === undefined) {
@@ -173,7 +195,9 @@ const onIframeLoad = (e: Event): void => {
 	}
 
 	state.loadedIframeIds.delete(iframe.id)
-	iframe.src = state.url
+
+	const url = index === null ? state.url : state.urls[index]
+	iframe.src = url
 }
 
 function icon(iconId: IconId): VNode {
@@ -188,20 +212,54 @@ function icon(iconId: IconId): VNode {
 
 function view(state: State): VNode {
 	const columns: VNode[] = [...Array<null>(state.columnsCount)].map((_, index) => {
+		const url = state.displayMode === 'single-page' ? state.url : state.urls[index]
 		return h('div.column',
 			{
 				on: {
 					// @ts-ignore: Wrong typing in Snabbdom lib
-					scroll: [scroll, index],
+					scroll: [scroll, state, index],
 				},
 			},
 			[
-				state.url && h('iframe', {
-					attrs: {src: state.url, id: uuid(), frameborder: '0', scrolling: 'no'},
-					on: {
-						load: onIframeLoad,
+				state.displayMode === 'multi-page' ? h('div.column-url', [
+					h('div.column-url--icon', [
+						icon('url'),
+					]),
+					h('div.column-url--content', [
+						h('label.column-url--title', {
+							attrs: {for: `column-url-${index}`},
+						}, 'URL'),
+						h('div.column-url--field', [
+							h('input', {
+								attrs: {
+									type: 'url',
+									name: `column-url-${index}`,
+									id: `column-url-${index}`,
+									value: url,
+									placeholder: 'https://example.com',
+								},
+								on: {
+									change: (e: Event) => {
+										onUrlChange(state, index, e)
+									},
+								},
+							}),
+						]),
+					]),
+				]) : null,
+				url ? h('iframe', {
+					attrs: {
+						src: url,
+						id: uuid(),
+						frameborder: '0',
+						scrolling: 'no',
 					},
-				}),
+					on: {
+						load: (e: Event) => {
+							onIframeLoad(state, index, e)
+						},
+					},
+				}) : null,
 			],
 		)
 	})
@@ -277,7 +335,7 @@ function view(state: State): VNode {
 					]),
 				]),
 			]),
-			h('div.header-block', [
+			h(`div.header-block${state.displayMode === 'multi-page' ? '.header-block__disabled' : ''}`, [
 				h('div.header-block--icon', [
 					icon('url'),
 				]),
@@ -293,8 +351,11 @@ function view(state: State): VNode {
 								id: 'url',
 								value: state.url,
 								placeholder: 'https://example.com',
+								disabled: state.displayMode === 'multi-page',
 							},
-							on: {change: onUrlChange},
+							on: {change: (e: Event) => {
+								onUrlChange(state, null, e)
+							}},
 						}),
 					]),
 				]),
@@ -348,7 +409,7 @@ function view(state: State): VNode {
 				]),
 			]),
 		]),
-		h('div.columns', {
+		h(`div.columns${state.displayMode === 'multi-page' ? '.columns__multi-page' : ''}`, {
 			attrs: {
 				style: `--columns-count: ${state.columnsCount}; --columns-width: ${state.columnsWidth}px`,
 			},
@@ -364,7 +425,7 @@ function render(state: State): void {
 	oldVNode = newVNode
 
 	setTimeout(() => {
-		scroll(0)
+		scroll(state, 0)
 	})
 }
 
