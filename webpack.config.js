@@ -16,8 +16,7 @@ const config = {
 		ignored: /node_modules/,
 	},
 	entry: {
-		main: './src/main.ts',
-		styles: './src/style.css',
+		main: ['./src/main.ts', './src/style.css'],
 	},
 	output: {
 		filename: '[name].[hash].js',
