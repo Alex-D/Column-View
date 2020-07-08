@@ -1,0 +1,326 @@
+:root {
+	--padding: 24px;
+	--options-height: calc(90px + var(--padding) * 2);
+	--columns-count: 4;
+	--columns-width: 1fr;
+	--letter-spacing: 6px;
+	--columns-height: 100px;
+}
+
+@font-face {
+	font-family: 'Source Sans Pro';
+	src: url(./fonts/source-sans-pro-regular.woff2) format('woff2');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Montserrat';
+	src: url(./fonts/montserrat-bold-uppercase.woff2) format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	color: #ffffff;
+	background: #19191a;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size: 18px;
+	line-height: 1;
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+header {
+	display: grid;
+	grid-template-columns: 130px 2fr 3fr 2fr 2fr;
+	grid-gap: 10px;
+	height: var(--options-height);
+	padding: var(--padding);
+}
+
+iframe {
+	width: 100%;
+	height: 20000px;
+	overflow: hidden;
+}
+
+label {
+	display: block;
+}
+
+input,
+button {
+	font-size: 16px;
+	color: #ffffff;
+	background: transparent;
+	border: 0;
+}
+
+input[type="number"],
+input[type="url"] {
+	width: calc(100% + 16px);
+	height: 38px;
+	padding: 8px;
+	margin: 0 -8px;
+	-moz-appearance: textfield;
+}
+
+/* Hack for Blink browsers to vertical align text correctly */
+@media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
+	input[type="number"],
+	input[type="url"] {
+		padding: 9.4px 8px 6.6px;
+	}
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+}
+
+input[type="number"]:focus,
+input[type="url"]:focus {
+	outline: 1px solid #dc9999;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+	caret-color: #ffffff;
+	-webkit-text-fill-color: #ffffff;
+	-webkit-box-shadow: 0 0 0px 1000px #19191a inset;
+}
+
+button {
+	margin-right: 16px;
+}
+
+button:disabled {
+	opacity: 0.3;
+}
+
+.header-logo {
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 600;
+	font-size: 12px;
+	letter-spacing: var(--letter-spacing);
+	line-height: 1.6;
+	text-transform: uppercase;
+	margin: 0;
+	padding: 25px 15px;
+}
+
+.header-block,
+.column-url {
+	display: flex;
+	height: 100%;
+	border: 1px solid #dc9999;
+}
+
+.column-url {
+	height: calc(var(--options-height) - (var(--padding) * 2));
+	border-width: 0;
+	border-bottom-width: 1px;
+}
+
+.header-block__disabled {
+	opacity: 0.3;
+	pointer-events: none;
+}
+
+.header-block--icon,
+.column-url--icon {
+	display: flex;
+	width: 64px;
+	height: 100%;
+	border-right: 1px solid #dc9999;
+}
+
+.header-block--icon svg,
+.column-url--icon svg {
+	width: 24px;
+	height: 24px;
+	margin: auto;
+}
+
+.header-block--content,
+.column-url--content {
+	position: relative;
+	width: 100%;
+	padding: 16px 16px 0;
+}
+
+.header-block--title,
+.column-url--title {
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 600;
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: var(--letter-spacing);
+	padding-bottom: 14px;
+}
+
+.header-block--field,
+.column-url--field {
+	position: relative;
+	height: 40px;
+}
+
+.header-block--field[data-unit]::after {
+	content: attr(data-unit);
+	position: absolute;
+	font-size: 18px;
+	top: 0;
+	right: 8px;
+	bottom: 0;
+	line-height: 38px;
+	opacity: 0.6;
+	pointer-events: none;
+}
+
+.header-block--field-screen-size {
+	width: 65px;
+}
+
+.header-block--field button {
+	width: 24px;
+	height: 24px;
+	background: #313131;
+	margin-top: 8px;
+}
+
+.header-block--field button:not(:disabled):hover {
+	outline: 1px solid #dc9999;
+}
+
+.header-switch {
+	position: absolute;
+	right: -1px;
+	bottom: -1px;
+	left: -1px;
+}
+
+.header-switch--item {
+	display: inline-block;
+	position: relative;
+	width: 50%;
+	padding: 15px 15px 13px;
+	font-size: 16px;
+	border: 1px solid #dc9999;
+	opacity: 0.5;
+}
+
+input:checked + .header-switch--item {
+	opacity: 1;
+}
+
+.header-switch--radio {
+	position: absolute;
+	opacity: 0;
+}
+
+.column-count {
+	margin-right: 16px;
+}
+
+.columns {
+	display: grid;
+	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width)) 1px; /* 1px is for the last column padding-right fix */
+	grid-gap: var(--padding);
+	height: calc(100vh - var(--options-height));
+	padding: 0 var(--padding);
+	overflow-x: auto;
+	overflow-y: hidden;
+
+	/* Custom scrollbar for Firefox */
+	scrollbar-color: #dc9999 #19191a;
+}
+
+.columns__multi-page {
+	grid-template-columns: repeat(var(--columns-count), var(--columns-width)) 1px; /* 1px is for the last column padding-right fix */
+}
+
+body:not(.macos) .columns::-webkit-scrollbar {
+	width: 16px;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-track {
+	background: #19191a;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-thumb {
+	background: #dc9999;
+	border: 0 solid #19191a;
+	border-right-width: 24px;
+	border-left-width: 23px;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-thumb:hover {
+	background: #dc9999cc;
+}
+
+body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
+	background: #dc999999;
+}
+
+.column {
+	position: relative;
+	height: calc(100vh - var(--options-height) - var(--padding));
+	overflow: auto;
+	border: 1px solid #dc9999;
+
+	/* Remove scrollbar on Firefox */
+	scrollbar-width: none;
+}
+
+.column:empty {
+	/* diagonal line */
+	background-image: linear-gradient(to top left, #dc999900 0%, #dc999900 calc(50% - 1px), #dc9999 50%, #dc999900 calc(50% + 1px), #dc999900 100%);
+}
+
+/* Remove scrollbar on Webkit/Blink browsers */
+.column::-webkit-scrollbar {
+	width: 0;
+}
+
+.nav-column--container {
+	transform-origin: 0 0;
+	width: 500%;
+	height: 500%;
+	transform: scale(0.2);
+}
+
+.nav-column--container iframe {
+	pointer-events: none;
+}
+
+.nav-column--placeholders {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	transform: translateY(var(--scroll-top));
+}
+
+.nav-column--placeholder {
+	width: 100%;
+	height: var(--columns-height);
+	background: #dc9999;
+	opacity: 0.6;
+}
+
+.nav-column--placeholder:nth-child(2n) {
+	opacity: 0.3;
+}
+
