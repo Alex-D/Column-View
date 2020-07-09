@@ -1,0 +1,8 @@
+dist/
+node_modules/
+src/
+package.json
+package-lock.json
+README.md
+tsconfig.json
+webpack.config.js
