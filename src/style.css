@@ -147,7 +147,7 @@ button:disabled {
 }
 
 .header-block:hover .header-block--icon,
-.header-block:focus-within .header-block--icon,
+.header-block__focus-within:focus-within .header-block--icon,
 .column-url:hover .column-url--icon,
 .column-url:focus-within .column-url--icon {
 	background: #dc9999;

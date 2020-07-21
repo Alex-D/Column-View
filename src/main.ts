@@ -344,7 +344,7 @@ function view(state: State): VNode {
 					]),
 				]),
 			]),
-			h(`div.header-block${state.displayMode === 'multi-page' ? '.header-block__disabled' : ''}`, [
+			h(`div.header-block.header-block__focus-within${state.displayMode === 'multi-page' ? '.header-block__disabled' : ''}`, [
 				h('div.header-block--icon', [
 					icon('url'),
 				]),
@@ -390,7 +390,7 @@ function view(state: State): VNode {
 					]),
 				]),
 			]),
-			h('div.header-block', [
+			h('div.header-block.header-block__focus-within', [
 				h('div.header-block--icon', [
 					icon('screen-size'),
 				]),
