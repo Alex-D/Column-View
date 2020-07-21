@@ -90,7 +90,7 @@ input::-webkit-inner-spin-button {
 
 input[type="number"]:focus,
 input[type="url"]:focus {
-	outline: 1px solid #dc9999;
+	outline: none;
 }
 
 input:-webkit-autofill,
@@ -146,6 +146,13 @@ button:disabled {
 	border-right: 1px solid #dc9999;
 }
 
+.header-block:hover .header-block--icon,
+.header-block:focus-within .header-block--icon,
+.column-url:hover .column-url--icon,
+.column-url:focus-within .column-url--icon {
+	background: #dc9999;
+}
+
 .header-block--icon svg,
 .column-url--icon svg {
 	width: 24px;
@@ -199,6 +206,10 @@ button:disabled {
 	margin-top: 8px;
 }
 
+.header-block--field button:not(:disabled) {
+	cursor: pointer;
+}
+
 .header-block--field button:not(:disabled):hover {
 	outline: 1px solid #dc9999;
 }
@@ -227,6 +238,10 @@ input:checked + .header-switch--item {
 .header-switch--radio {
 	position: absolute;
 	opacity: 0;
+}
+
+.header-switch--radio:not(:checked) + .header-switch--item {
+	cursor: pointer;
 }
 
 .column-count {
