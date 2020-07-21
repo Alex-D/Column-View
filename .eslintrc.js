@@ -1,23 +1,26 @@
 /* eslint-env node, browser:false */
 
 module.exports = {
-	'env': {
-		'browser': true,
-		'es6': true,
+	env: {
+		browser: true,
+		es6: true,
 	},
-	'extends': [
+	globals: {
+		'PRODUCTION': 'readonly',
+	},
+	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/eslint-recommended',
 		'plugin:@typescript-eslint/recommended',
 	],
-	'parser': '@typescript-eslint/parser',
-	'parserOptions': {
-		'project': './tsconfig.json',
+	parser: '@typescript-eslint/parser',
+	parserOptions: {
+		project: './tsconfig.json',
 	},
-	'plugins': [
+	plugins: [
 		'@typescript-eslint',
 	],
-	'rules': {
+	rules: {
 		'comma-dangle': [
 			'error',
 			'always-multiline',
