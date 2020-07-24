@@ -1,10 +1,12 @@
 :root {
 	--padding: 24px;
-	--options-height: calc(90px + var(--padding) * 2);
+	--block-height: 90px;
+	--options-height: calc(var(--block-height) + var(--padding) * 2);
 	--columns-count: 4;
 	--columns-width: 1fr;
 	--letter-spacing: 6px;
 	--columns-height: 100px;
+	--input-content-width: 3;
 }
 
 @font-face {
@@ -66,21 +68,13 @@ button {
 	border: 0;
 }
 
-input[type="number"],
+.header-block--field-screen-size input,
 input[type="url"] {
-	width: calc(100% + 16px);
+	width: 100%;
 	height: 38px;
-	padding: 8px;
-	margin: 0 -8px;
+	padding: 0;
+	transform: translateY(1px);
 	-moz-appearance: textfield;
-}
-
-/* Hack for Blink browsers to vertical align text correctly */
-@media all and (-webkit-min-device-pixel-ratio: 0) and (min-resolution: .001dpcm) {
-	input[type="number"],
-	input[type="url"] {
-		padding: 9.4px 8px 6.6px;
-	}
 }
 
 input::-webkit-outer-spin-button,
@@ -88,7 +82,7 @@ input::-webkit-inner-spin-button {
 	-webkit-appearance: none;
 }
 
-input[type="number"]:focus,
+.header-block--field-screen-size input:focus,
 input[type="url"]:focus {
 	outline: none;
 }
@@ -98,7 +92,7 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
 	caret-color: #ffffff;
 	-webkit-text-fill-color: #ffffff;
-	-webkit-box-shadow: 0 0 0px 1000px #19191a inset;
+	-webkit-box-shadow: 0 0 0 1000px #19191a inset;
 }
 
 button {
@@ -123,12 +117,11 @@ button:disabled {
 .header-block,
 .column-url {
 	display: flex;
-	height: 100%;
+	height: var(--block-height);
 	border: 1px solid #dc9999;
 }
 
 .column-url {
-	height: calc(var(--options-height) - (var(--padding) * 2));
 	border-width: 0;
 	border-bottom-width: 1px;
 }
@@ -180,23 +173,21 @@ button:disabled {
 .header-block--field,
 .column-url--field {
 	position: relative;
-	height: 40px;
-}
-
-.header-block--field[data-unit]::after {
-	content: attr(data-unit);
-	position: absolute;
-	font-size: 18px;
-	top: 0;
-	right: 8px;
-	bottom: 0;
-	line-height: 38px;
-	opacity: 0.6;
-	pointer-events: none;
+	height: 38px;
 }
 
 .header-block--field-screen-size {
-	width: 65px;
+	width: 100px;
+}
+
+.header-block--field-screen-size input[type="number"] {
+	width: calc(var(--input-content-width) * 1ch + 4px);
+}
+
+.header-block--field-screen-size input[disabled] {
+	width: 25px;
+	opacity: 0.6;
+	pointer-events: none;
 }
 
 .header-block--field button {
@@ -204,6 +195,7 @@ button:disabled {
 	height: 24px;
 	background: #313131;
 	margin-top: 8px;
+	padding: 0;
 }
 
 .header-block--field button:not(:disabled) {

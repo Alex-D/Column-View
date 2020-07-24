@@ -23,6 +23,7 @@ interface State {
 	urls: string[],
 	columnsCount: number,
 	columnsWidth: number,
+	columnWidthCharCount: number,
 	columnsHeight: number,
 	scrollTop: number,
 	hasNavColumn: boolean,
@@ -57,6 +58,7 @@ const state: State = {
 	urls,
 	columnsCount,
 	columnsWidth,
+	columnWidthCharCount: columnsWidth.toString().length,
 	columnsHeight: 0,
 	scrollTop: 0,
 	hasNavColumn,
@@ -398,11 +400,7 @@ function view(state: State): VNode {
 					h('label.header-block--title', {
 						attrs: {for: 'columnsWidth'},
 					}, 'Screen size'),
-					h('div.header-block--field.header-block--field-screen-size', {
-						attrs: {
-							'data-unit': 'px',
-						},
-					}, [
+					h('div.header-block--field.header-block--field-screen-size', [
 						h('input', {
 							attrs: {
 								type: 'number',
@@ -411,8 +409,25 @@ function view(state: State): VNode {
 								min: MIN_COLUMNS_WIDTH,
 								max: MAX_COLUMNS_WIDTH,
 								value: state.columnsWidth,
+								style: `--input-content-width: ${state.columnWidthCharCount}`,
 							},
-							on: {change: onColumnsWidthChange},
+							on: {
+								change: onColumnsWidthChange,
+								input: (e: Event): void => {
+									const event = e as DOMEvent<HTMLInputElement>
+									const previousColumnWidthCharCount = state.columnWidthCharCount
+									state.columnWidthCharCount = event.target.value.length
+									if (previousColumnWidthCharCount !== state.columnWidthCharCount) {
+										render(state)
+									}
+								},
+							},
+						}),
+						h('input', {
+							attrs: {
+								value: 'px',
+								disabled: 'disabled',
+							},
 						}),
 					]),
 				]),
