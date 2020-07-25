@@ -110,8 +110,78 @@ button:disabled {
 	letter-spacing: var(--letter-spacing);
 	line-height: 1.6;
 	text-transform: uppercase;
-	margin: 0;
+	margin: -1px;
 	padding: 25px 15px;
+	border: 1px solid #dc9999;
+	z-index: 1;
+}
+
+.header-logo--details {
+	display: none;
+	position: absolute;
+	top: calc(var(--options-height) - var(--padding) - 1px);
+	left: var(--padding);
+	/* logo width - 3*grid gap + 2*border + 2fr */
+	width: calc(130px - 3 * 10px + 2px + (100vw - 2 * var(--padding)) / 9 * 2);
+	background: #19191a;
+	border: 1px solid #dc9999;
+	line-height: 1.6;
+	font-size: 16px;
+	z-index: 1;
+}
+
+.header-logo--overlay {
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	top: 0;
+	left: 0;
+	background: #19191a;
+	z-index: 1;
+	opacity: 0;
+	pointer-events: none;
+	transition: 150ms opacity;
+}
+
+.header-logo:hover + .header-logo--details,
+.header-logo--details:hover {
+	display: block;
+}
+
+.header-block__logo:hover .header-logo--overlay {
+	opacity: 0.7;
+}
+
+.header-logo--description {
+	margin: 0;
+	padding: var(--padding);
+}
+
+.header-logo--authors {
+	border-top: 1px solid #dc9999;
+	padding: var(--padding);
+}
+
+.header-logo--authors a {
+	position: relative;
+	font-family: 'Montserrat', sans-serif;
+	margin-left: 10px;
+	text-transform: uppercase;
+	font-size: 14px;
+	color: #dc9999;
+	text-decoration: none;
+	letter-spacing: var(--letter-spacing);
+}
+
+.header-logo--authors a:hover::after {
+	content: "";
+	display: block;
+	position: absolute;
+	left: 0;
+	bottom: -3px;
+	right: var(--letter-spacing);
+	height: 1px;
+	background: #dc9999;
 }
 
 .header-block,
@@ -242,7 +312,7 @@ input:checked + .header-switch--item {
 
 .columns {
 	display: grid;
-	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width)) 1px; /* 1px is for the last column padding-right fix */
+	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width)) 0.1px; /* 0.1px is for the last column padding-right fix */
 	grid-gap: var(--padding);
 	height: calc(100vh - var(--options-height));
 	padding: 0 var(--padding);
@@ -254,7 +324,7 @@ input:checked + .header-switch--item {
 }
 
 .columns__multi-page {
-	grid-template-columns: repeat(var(--columns-count), var(--columns-width)) 1px; /* 1px is for the last column padding-right fix */
+	grid-template-columns: repeat(var(--columns-count), var(--columns-width)) 0.1px; /* 0.1px is for the last column padding-right fix */
 }
 
 body:not(.macos) .columns::-webkit-scrollbar {

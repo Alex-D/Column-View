@@ -115,7 +115,7 @@ function scroll(state: State, columnIndex: number): void {
 	}, 100)
 
 	const navScrollTop = Math.max(0, columns[0].scrollTop)
-	app.setAttribute('style',  `--columns-height: ${columnsHeight}px; --scroll-top: ${navScrollTop}px`)
+	app.setAttribute('style', `--columns-height: ${columnsHeight}px; --scroll-top: ${navScrollTop}px`)
 }
 
 function updateHistory(state: State): void {
@@ -305,7 +305,32 @@ function view(state: State): VNode {
 
 	return h('div#app', [
 		h('header', [
-			h('h1.header-block.header-logo', 'Column View'),
+			h('div.header-block.header-block__logo', [
+				h('div.header-logo--overlay'),
+				h('div.header-logo', [
+					'Column View',
+				]),
+				h('div.header-logo--details', [
+					h('p.header-logo--description', [
+						'Column view is a tool that helps you view the mobile version of your website directly in multiple columns or helps you check multiple pages at once.',
+					]),
+					h('div.header-logo--authors', [
+						'Design',
+						h('a', {
+							attrs: {
+								href: 'https://twitter.com/adriengervaix',
+							},
+						}, '@adriengervaix'),
+						h('br'),
+						'Development',
+						h('a', {
+							attrs: {
+								href: 'https://twitter.com/AlexandreDemode',
+							},
+						}, '@AlexandreDemode'),
+					]),
+				]),
+			]),
 			h('div.header-block', [
 				h('div.header-block--icon', [
 					icon('type'),
@@ -364,9 +389,11 @@ function view(state: State): VNode {
 								placeholder: 'https://example.com',
 								disabled: state.displayMode === 'multi-page',
 							},
-							on: {change: (e: Event) => {
-								onUrlChange(state, null, e)
-							}},
+							on: {
+								change: (e: Event) => {
+									onUrlChange(state, null, e)
+								},
+							},
 						}),
 					]),
 				]),
