@@ -366,14 +366,15 @@ function view(state: State): VNode {
 					'Column View',
 				]),
 				h('div.header-logo--details', [
-					h('p.header-logo--description', [
+					h('p', [
 						'Column view is a tool that helps you view the mobile version of your website directly in multiple columns or helps you check multiple pages at once.',
 					]),
-					h('div.header-logo--authors', [
+					h('div', [
 						'Design',
 						h('a', {
 							attrs: {
 								href: 'https://twitter.com/adriengervaix',
+								target: '_blank',
 							},
 						}, '@adriengervaix'),
 						h('br'),
@@ -381,8 +382,18 @@ function view(state: State): VNode {
 						h('a', {
 							attrs: {
 								href: 'https://twitter.com/AlexandreDemode',
+								target: '_blank',
 							},
 						}, '@AlexandreDemode'),
+					]),
+					h('div.header-logo--see-on-github', [
+						'Open Source under MIT License',
+						h('a', {
+							attrs: {
+								href: 'https://github.com/Alex-D/Column-View',
+								target: '_blank',
+							},
+						},'See on GitHub'),
 					]),
 				]),
 			]),
