@@ -10,9 +10,31 @@ const DEFAULT_DISPLAY_MODE = 'single-page'
 const DEFAULT_COLUMNS_COUNT = 5
 const MIN_COLUMNS_COUNT = 1
 const MAX_COLUMNS_COUNT = 10
-const DEFAULT_COLUMNS_WIDTH = 380
-const MIN_COLUMNS_WIDTH = 320
+const DEFAULT_COLUMNS_WIDTH = 375
+const MIN_COLUMNS_WIDTH = 280
 const MAX_COLUMNS_WIDTH = 4000
+const DEVICES = [
+	{
+		'name': 'iPhone 5/SE',
+		'width': 320,
+	},
+	{
+		'name': 'Moto G / Galaxy S5',
+		'width': 360,
+	},
+	{
+		'name': 'iPhone 6/7/8/X',
+		'width': 375,
+	},
+	{
+		'name': 'iPhone 6/7/8 Plus',
+		'width': 414,
+	},
+	{
+		'name': 'iPad',
+		'width': 768,
+	},
+]
 
 type DisplayMode = 'single-page' | 'multi-page'
 type IconId = 'column-count' | 'screen-size' | 'url' | 'type'
@@ -182,9 +204,19 @@ const onUrlChange = throttle((state: State, index: number | null, e: Event): voi
 const onColumnsWidthChange = throttle((e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
 	state.columnsWidth = parseInt(event.target.value)
+	state.columnWidthCharCount = event.target.value.length
 	updateHistory(state)
 	render(state)
+
+	event.target.value = state.columnsWidth.toString()
 }, 100)
+
+const onClickScreenSizeItem = (columnsWidth: number): void => {
+	state.columnsWidth = columnsWidth
+	state.columnWidthCharCount = columnsWidth.toString().length
+	updateHistory(state)
+	render(state)
+}
 
 const onDisplayModeChange = (e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
@@ -219,6 +251,15 @@ function icon(iconId: IconId): VNode {
 			},
 		}),
 	])
+}
+
+function getDeviceNameByWidth(width: number): string | undefined {
+	const device = DEVICES.find((device) => device.width === width)
+	if (device === undefined) {
+		return 'Custom'
+	}
+
+	return device.name
 }
 
 function view(state: State): VNode {
@@ -303,6 +344,20 @@ function view(state: State): VNode {
 		)
 	}
 
+	// Generate screen size dropdown
+	const columnsWidthDevices = DEVICES.map((device) => {
+		return h('div.header-block--dropdown-item', {
+			on: {
+				// @ts-ignore: Wrong typing in Snabbdom lib
+				click: [onClickScreenSizeItem, device.width],
+			},
+		}, [
+			h('div', device.name),
+			h('div.header-block--dropdown-item-details', device.width + 'px'),
+		])
+	})
+
+	// Generate the view
 	return h('div#app', [
 		h('header', [
 			h('div.header-block.header-block__logo', [
@@ -452,12 +507,13 @@ function view(state: State): VNode {
 						}),
 						h('input', {
 							attrs: {
-								value: 'px',
+								value: `px — ${getDeviceNameByWidth(state.columnsWidth)}`,
 								disabled: 'disabled',
 							},
 						}),
 					]),
 				]),
+				h('div.header-block--dropdown', columnsWidthDevices),
 			]),
 		]),
 		h(`div.columns${state.displayMode === 'multi-page' ? '.columns__multi-page' : ''}`, {
