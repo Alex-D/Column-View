@@ -9,6 +9,7 @@
 	--letter-spacing: 6px;
 	--columns-height: 100px;
 	--input-content-width: 3;
+	--scroll-top: 0;
 }
 
 @font-face {
@@ -202,6 +203,7 @@ button:disabled {
 	display: flex;
 	height: var(--block-height);
 	border: 1px solid #dc9999;
+	z-index: 1;
 }
 
 .header-block__logo {
@@ -408,6 +410,8 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 	height: calc(100vh - var(--options-height) - var(--padding));
 	overflow: auto;
 	border: 1px solid #dc9999;
+	background: #19191a;
+	box-shadow: #19191a -24px 0 0;
 
 	/* Remove scrollbar on Firefox */
 	scrollbar-width: none;
@@ -452,4 +456,89 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 
 .nav-column--placeholder:nth-child(2n) {
 	opacity: 0.3;
+}
+
+/* Loading animation */
+#app {
+	position: absolute;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+}
+
+.header-block {
+	animation: fadeIn 350ms both;
+}
+
+.header-block:nth-child(1) {
+	animation-delay: 215ms;
+}
+
+.header-block:nth-child(2) {
+	animation-delay: 245ms;
+}
+
+.header-block:nth-child(3) {
+	animation-delay: 275ms;
+}
+
+.header-block:nth-child(4) {
+	animation-delay: 305ms;
+}
+
+.header-block:nth-child(5) {
+	animation-delay: 345ms;
+}
+
+.column {
+	animation: slideIn 250ms 50ms both;
+}
+
+.column:nth-child(2) {
+	animation-delay: 80ms;
+}
+
+.column:nth-child(3) {
+	animation-delay: 110ms;
+}
+
+.column:nth-child(4) {
+	animation-delay: 140ms;
+}
+
+.column:nth-child(5) {
+	animation-delay: 170ms;
+}
+
+.column:nth-child(6) {
+	animation-delay: 200ms;
+}
+
+.column:nth-child(7) {
+	animation-delay: 230ms;
+}
+
+.column:nth-child(8) {
+	animation-delay: 260ms;
+}
+
+.column:nth-child(9) {
+	animation-delay: 290ms;
+}
+
+.column:nth-child(10) {
+	animation-delay: 320ms;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+}
+
+@keyframes slideIn {
+	from {
+		transform: translateY(calc(100% + 50px));
+	}
 }

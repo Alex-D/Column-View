@@ -1,6 +1,7 @@
 import {init} from 'snabbdom/src/package/init'
 import {h} from 'snabbdom/src/package/h'
 import {attributesModule} from 'snabbdom/src/package/modules/attributes'
+import {classModule} from 'snabbdom/src/package/modules/class'
 import {eventListenersModule} from 'snabbdom/src/package/modules/eventlisteners'
 import {VNode} from 'snabbdom/src/package/vnode'
 import {throttle} from 'lodash-es'
@@ -58,6 +59,7 @@ interface DOMEvent<T extends EventTarget> extends Event {
 
 const patch = init([
 	attributesModule,
+	classModule,
 	eventListenersModule,
 ])
 
@@ -437,7 +439,11 @@ function view(state: State): VNode {
 					]),
 				]),
 			]),
-			h(`div.header-block.header-block__focus-within${state.displayMode === 'multi-page' ? '.header-block__disabled' : ''}`, [
+			h('div.header-block.header-block__focus-within', {
+				class: {
+					'header-block__disabled': state.displayMode === 'multi-page',
+				},
+			},[
 				h('div.header-block--icon', [
 					icon('url'),
 				]),
@@ -527,7 +533,10 @@ function view(state: State): VNode {
 				h('div.header-block--dropdown', columnsWidthDevices),
 			]),
 		]),
-		h(`div.columns${state.displayMode === 'multi-page' ? '.columns__multi-page' : ''}`, {
+		h('div.columns', {
+			class: {
+				'columns__multi-page': state.displayMode === 'multi-page',
+			},
 			attrs: {
 				style: `--columns-count: ${state.columnsCount}; --columns-width: ${state.columnsWidth}px`,
 			},
@@ -552,3 +561,5 @@ const throttledRender = throttle(render, 50)
 window.addEventListener('resize', () => throttledRender(state))
 
 render(state)
+
+document.body.classList.add('loaded')
