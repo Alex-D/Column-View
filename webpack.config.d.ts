@@ -1,1 +1,1 @@
-declare const PRODUCTION: 'production' | 'development';
+declare const IS_PRODUCTION: boolean;

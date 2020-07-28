@@ -189,7 +189,7 @@ const onUrlChange = throttle((state: State, index: number | null, e: Event): voi
 	}
 	updateHistory(state)
 
-	if (PRODUCTION === 'production') {
+	if (IS_PRODUCTION) {
 		const urlProtocol = state.url.split(':')[0]
 		if (window.location.protocol !== `${urlProtocol}:`) {
 			window.location.replace(`${urlProtocol}:${location.href.substring(location.protocol.length)}`)

@@ -49,7 +49,7 @@ const config = {
 		}),
 		new CleanWebpackPlugin(),
 		new webpack.DefinePlugin({
-			PRODUCTION: JSON.stringify(process.env.NODE_ENV === 'production'),
+			IS_PRODUCTION: JSON.stringify(process.env.NODE_ENV === 'production'),
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
 		}),
 	],
