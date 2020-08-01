@@ -241,7 +241,7 @@ const onIframeLoad = (state: State, index: number | null, e: Event): void => {
 
 	state.loadedIframeIds.delete(iframe.id)
 
-	const url = index === null ? state.url : state.urls[index]
+	const url = state.displayMode === 'single-page' ? state.url : state.urls[index || 0]
 	iframe.src = url
 }
 
