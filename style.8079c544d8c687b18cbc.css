@@ -2,7 +2,7 @@
 	--padding: 24px;
 	--inner-padding: 16px;
 	--block-height: 90px;
-	--block-icon-width: 64px;
+	--block-icon-width: 56px;
 	--options-height: calc(var(--block-height) + var(--padding) * 2);
 	--columns-count: 4;
 	--columns-width: 1fr;
@@ -124,8 +124,9 @@ button:disabled {
 	position: absolute;
 	top: calc(var(--options-height) - var(--padding) - 1px);
 	left: var(--padding);
+	min-width: 480px;
 	/* logo width - 3*grid gap + 2*border + 2fr */
-	width: calc(130px - 3 * 10px + 2px + (100vw - 2 * var(--padding)) / 9 * 2);
+	max-width: calc(130px - 3 * 10px + 2px + (100vw - 2 * var(--padding)) / 9 * 2);
 	background: #19191a;
 	border: 1px solid #dc9999;
 	line-height: 1.6;
@@ -203,6 +204,9 @@ button:disabled {
 	display: flex;
 	height: var(--block-height);
 	border: 1px solid #dc9999;
+}
+
+.header-block {
 	z-index: 1;
 }
 
@@ -245,18 +249,19 @@ button:disabled {
 .header-block--content,
 .column-url--content {
 	position: relative;
-	width: 100%;
+	width: calc(100% - var(--block-icon-width));
 	padding: var(--inner-padding) var(--inner-padding) 0;
 }
 
 .header-block--title,
 .column-url--title {
+	height: 26px;
 	font-family: 'Montserrat', sans-serif;
 	font-weight: 600;
 	font-size: 12px;
 	text-transform: uppercase;
 	letter-spacing: var(--letter-spacing);
-	padding-bottom: 14px;
+	padding-bottom: 2px;
 }
 
 .header-block--field,
@@ -287,6 +292,10 @@ button:disabled {
 	padding: 0;
 }
 
+.header-block--field button:last-child {
+	margin-right: 0;
+}
+
 .header-block--field button:not(:disabled) {
 	cursor: pointer;
 }
@@ -300,16 +309,19 @@ button:disabled {
 	right: -1px;
 	bottom: -1px;
 	left: -1px;
+	display: flex;
 }
 
 .header-switch--item {
-	display: inline-block;
 	position: relative;
 	width: 50%;
 	padding: 15px 15px 13px;
 	font-size: 16px;
 	border: 1px solid #dc9999;
 	opacity: 0.5;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
 }
 
 input:checked + .header-switch--item {
@@ -346,7 +358,7 @@ input:checked + .header-switch--item {
 
 .header-block--dropdown-item {
 	padding: var(--padding);
-	padding-left: calc(var(--block-icon-width) - 9px + var(--inner-padding));
+	padding-left: calc(var(--block-icon-width) + var(--inner-padding));
 	cursor: pointer;
 	line-height: 1;
 }
