@@ -54,6 +54,10 @@
 </head>
 <body>
 <script>
+	if (window.location.hostname !== 'localhost' && window.location.protocol !== 'https:' && window.location.search.length < 2) {
+		window.location.href = window.location.href.replace('http:', 'https:')
+	}
+
 	const isMacOs = navigator.platform.toLowerCase().includes('mac')
 	if (isMacOs) {
 		document.body.classList.add('macos')
