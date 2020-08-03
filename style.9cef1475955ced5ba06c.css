@@ -479,7 +479,6 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 	left: 0;
 }
 
-body.loaded .header-block,
 body.loaded .column {
 	animation: none;
 }
