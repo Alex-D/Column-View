@@ -481,12 +481,6 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 
 body.loaded .header-block,
 body.loaded .column {
-	animation-duration: 150ms;
-	animation-delay: 0ms;
-}
-
-body.loaded .column:nth-child(1),
-body.loaded .column:nth-child(2) {
 	animation: none;
 }
 
