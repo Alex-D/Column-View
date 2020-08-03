@@ -479,10 +479,6 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 	left: 0;
 }
 
-body.loaded .column {
-	animation: none;
-}
-
 .header-block {
 	animation: fadeIn 350ms both;
 	animation-delay: 450ms;
@@ -508,6 +504,10 @@ body.loaded .column {
 .column {
 	animation: slideIn 250ms 50ms both;
 	animation-delay: 500ms;
+}
+
+body.loaded .column {
+	animation: none;
 }
 
 .column:nth-child(2) {
