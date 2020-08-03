@@ -21,11 +21,11 @@
 			width: 400px;
 			height: 400px;
 			transform: translate(-50%, -50%);
-			animation: fadeIn 300ms 75ms both;
+			animation: logoFadeIn 300ms 100ms both;
 		}
 
 		body.loaded #logo {
-			animation: fadeOut 150ms 200ms both;
+			opacity: 0;
 		}
 
 		#svg-sprite {
@@ -39,14 +39,8 @@
 			overflow: hidden;
 		}
 
-		@keyframes fadeIn {
+		@keyframes logoFadeIn {
 			from {
-				opacity: 0;
-			}
-		}
-
-		@keyframes fadeOut {
-			to {
 				opacity: 0;
 			}
 		}

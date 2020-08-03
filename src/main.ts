@@ -560,6 +560,12 @@ const throttledRender = throttle(render, 50)
 
 window.addEventListener('resize', () => throttledRender(state))
 
-render(state)
+const initState = Object.assign({}, state)
+initState.url = ''
+initState.urls = []
+render(initState)
 
-document.body.classList.add('loaded')
+setTimeout(() => {
+	document.body.classList.add('loaded')
+	render(state)
+}, 1000)

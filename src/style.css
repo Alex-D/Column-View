@@ -481,66 +481,69 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 
 .header-block {
 	animation: fadeIn 350ms both;
-}
-
-.header-block:nth-child(1) {
-	animation-delay: 215ms;
+	animation-delay: 450ms;
 }
 
 .header-block:nth-child(2) {
-	animation-delay: 245ms;
+	animation-delay: 480ms;
 }
 
 .header-block:nth-child(3) {
-	animation-delay: 275ms;
+	animation-delay: 510ms;
 }
 
 .header-block:nth-child(4) {
-	animation-delay: 305ms;
+	animation-delay: 540ms;
 }
 
 .header-block:nth-child(5) {
-	animation-delay: 345ms;
+	animation-delay: 570ms;
 }
 
+/* Animation delay: 500 + 30 * n */
 .column {
 	animation: slideIn 250ms 50ms both;
+	animation-delay: 500ms;
+}
+
+body.loaded .column {
+	animation: none;
 }
 
 .column:nth-child(2) {
-	animation-delay: 80ms;
+	animation-delay: 560ms;
 }
 
 .column:nth-child(3) {
-	animation-delay: 110ms;
+	animation-delay: 590ms;
 }
 
 .column:nth-child(4) {
-	animation-delay: 140ms;
+	animation-delay: 620ms;
 }
 
 .column:nth-child(5) {
-	animation-delay: 170ms;
+	animation-delay: 650ms;
 }
 
 .column:nth-child(6) {
-	animation-delay: 200ms;
+	animation-delay: 680ms;
 }
 
 .column:nth-child(7) {
-	animation-delay: 230ms;
+	animation-delay: 710ms;
 }
 
 .column:nth-child(8) {
-	animation-delay: 260ms;
+	animation-delay: 740ms;
 }
 
 .column:nth-child(9) {
-	animation-delay: 290ms;
+	animation-delay: 770ms;
 }
 
 .column:nth-child(10) {
-	animation-delay: 320ms;
+	animation-delay: 800ms;
 }
 
 @keyframes fadeIn {
