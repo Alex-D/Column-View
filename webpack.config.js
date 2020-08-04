@@ -3,9 +3,10 @@
 
 const path = require('path')
 const webpack = require('webpack')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
-const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyPlugin = require('copy-webpack-plugin')
+const { CleanWebpackPlugin: CleanPlugin } = require('clean-webpack-plugin')
+const ForkTsCheckerPlugin = require('fork-ts-checker-webpack-plugin')
+const HtmlPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 
@@ -34,7 +35,7 @@ const config = {
 		publicPath: '/',
 	},
 	plugins: [
-		new ForkTsCheckerWebpackPlugin({
+		new ForkTsCheckerPlugin({
 			eslint: {
 				enabled: true,
 				files: './src/**/*.{js,ts}',
@@ -44,10 +45,15 @@ const config = {
 			filename: 'style.[contenthash].css',
 			chunkFilename: '[id].css',
 		}),
-		new HtmlWebpackPlugin({
+		new CopyPlugin({
+			patterns: [
+				{ from: './src/opengraph.png' },
+			],
+		}),
+		new HtmlPlugin({
 			template: './src/index.html',
 		}),
-		new CleanWebpackPlugin(),
+		new CleanPlugin(),
 		new webpack.DefinePlugin({
 			IS_PRODUCTION: JSON.stringify(process.env.NODE_ENV === 'production'),
 			'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
