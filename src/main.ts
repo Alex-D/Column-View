@@ -616,7 +616,3 @@ setTimeout(() => {
 		})
 	}
 }, 1000)
-
-setInterval(() => {
-	console.log(state)
-}, 2000)
