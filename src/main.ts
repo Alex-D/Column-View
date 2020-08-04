@@ -193,7 +193,7 @@ const onUrlChange = throttle((state: State, index: number | null, e: Event): voi
 
 	// Prefix with https:// when needed
 	let url = event.target.value
-	if (!url.startsWith('http')) {
+	if (url.length > 0 && !url.startsWith('http')) {
 		url = 'https://' + url
 	}
 
