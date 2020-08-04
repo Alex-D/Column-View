@@ -39,11 +39,13 @@ const DEVICES = [
 
 type DisplayMode = 'single-page' | 'multi-page'
 type IconId = 'column-count' | 'screen-size' | 'url' | 'type'
+type LoadStatus = 'ok' | 'failed'
 
 interface State {
 	displayMode: DisplayMode,
 	url: string,
 	urls: string[],
+	loadStatuses: LoadStatus[],
 	columnsCount: number,
 	columnsWidth: number,
 	columnWidthCharCount: number,
@@ -80,6 +82,7 @@ const state: State = {
 	displayMode,
 	url,
 	urls,
+	loadStatuses: [],
 	columnsCount,
 	columnsWidth,
 	columnWidthCharCount: columnsWidth.toString().length,
@@ -160,6 +163,18 @@ function updateHistory(state: State): void {
 	window.history.replaceState(null, '', newUrl)
 }
 
+function checkUrl(state: State, index: number | null, url: string): void {
+	fetch(url, {
+		method: 'HEAD',
+	}).then(() => {
+		state.loadStatuses[index || 0] = 'ok'
+		render(state)
+	}).catch(() => {
+		state.loadStatuses[index || 0] = 'failed'
+		render(state)
+	})
+}
+
 const setColumnsCount = throttle((newColumnsCount: number): void => {
 	state.columnsCount = newColumnsCount
 	updateHistory(state)
@@ -196,6 +211,8 @@ const onUrlChange = throttle((state: State, index: number | null, e: Event): voi
 			return
 		}
 	}
+
+	checkUrl(state, index, url)
 
 	render(state)
 
@@ -264,9 +281,31 @@ function getDeviceNameByWidth(width: number): string | undefined {
 	return device.name
 }
 
+function renderError(url: string): VNode {
+	return h('div.column-error', [
+		h('div.column-error--title', 'Error'),
+		h('p.column-error--description', [
+			'Cannot load ',
+			h('a', {
+				attrs: {
+					href: url,
+					target: '_blank',
+				},
+			}, url),
+			h('span.column-error--details', 'This is usually due to a wrong URL or CORS issues.'),
+		]),
+	])
+}
+
 function view(state: State): VNode {
+	const isSinglePageDisplayMode = state.displayMode === 'single-page'
+	const isMultiPageDisplayMode = state.displayMode === 'multi-page'
+
 	const columns: VNode[] = [...Array<null>(state.columnsCount)].map((_, index) => {
-		const url = state.displayMode === 'single-page' ? state.url : state.urls[index]
+		const url = isSinglePageDisplayMode ? state.url : state.urls[index]
+		const urlLoadStatus = isSinglePageDisplayMode ? state.loadStatuses[0] : state.loadStatuses[index]
+		const isErrored = urlLoadStatus === 'failed'
+
 		return h('div.column',
 			{
 				on: {
@@ -275,7 +314,7 @@ function view(state: State): VNode {
 				},
 			},
 			[
-				state.displayMode === 'multi-page' ? h('div.column-url', [
+				isMultiPageDisplayMode ? h('div.column-url', [
 					h('div.column-url--icon', [
 						icon('url'),
 					]),
@@ -301,7 +340,7 @@ function view(state: State): VNode {
 						]),
 					]),
 				]) : null,
-				url ? h('iframe', {
+				url && !isErrored ? h('iframe', {
 					attrs: {
 						src: url,
 						id: uuid(),
@@ -313,7 +352,7 @@ function view(state: State): VNode {
 							onIframeLoad(state, index, e)
 						},
 					},
-				}) : null,
+				}) : (isErrored ? renderError(url) : null),
 			],
 		)
 	})
@@ -322,7 +361,7 @@ function view(state: State): VNode {
 	columns.push(h('div.fix-for-horizontal-scroll-right-padding'))
 
 	// Show nav column
-	if (state.displayMode === 'single-page') {
+	if (isSinglePageDisplayMode) {
 		const navColumnPlaceholders: VNode[] = [...Array<null>(state.columnsCount)].map(() => {
 			return h('div.nav-column--placeholder')
 		})
@@ -395,7 +434,7 @@ function view(state: State): VNode {
 								href: 'https://github.com/Alex-D/Column-View',
 								target: '_blank',
 							},
-						},'See on GitHub'),
+						}, 'See on GitHub'),
 					]),
 				]),
 			]),
@@ -412,7 +451,7 @@ function view(state: State): VNode {
 								type: 'radio',
 								name: 'display-mode',
 								value: 'single-page',
-								checked: state.displayMode === 'single-page',
+								checked: isSinglePageDisplayMode,
 							},
 							on: {
 								change: onDisplayModeChange,
@@ -427,7 +466,7 @@ function view(state: State): VNode {
 								type: 'radio',
 								name: 'display-mode',
 								value: 'multi-page',
-								checked: state.displayMode === 'multi-page',
+								checked: isMultiPageDisplayMode,
 							},
 							on: {
 								change: onDisplayModeChange,
@@ -441,9 +480,9 @@ function view(state: State): VNode {
 			]),
 			h('div.header-block.header-block__focus-within', {
 				class: {
-					'header-block__disabled': state.displayMode === 'multi-page',
+					'header-block__disabled': isMultiPageDisplayMode,
 				},
-			},[
+			}, [
 				h('div.header-block--icon', [
 					icon('url'),
 				]),
@@ -459,7 +498,7 @@ function view(state: State): VNode {
 								id: 'url',
 								value: state.url,
 								placeholder: 'https://example.com',
-								disabled: state.displayMode === 'multi-page',
+								disabled: isMultiPageDisplayMode,
 							},
 							on: {
 								change: (e: Event) => {
@@ -535,7 +574,7 @@ function view(state: State): VNode {
 		]),
 		h('div.columns', {
 			class: {
-				'columns__multi-page': state.displayMode === 'multi-page',
+				'columns__multi-page': isMultiPageDisplayMode,
 			},
 			attrs: {
 				style: `--columns-count: ${state.columnsCount}; --columns-width: ${state.columnsWidth}px`,
@@ -568,4 +607,16 @@ render(initState)
 setTimeout(() => {
 	document.body.classList.add('loaded')
 	render(state)
+
+	if (state.displayMode === 'single-page') {
+		checkUrl(state, 0, state.url)
+	} else {
+		state.urls.forEach((url, index) => {
+			checkUrl(state, index, url)
+		})
+	}
 }, 1000)
+
+setInterval(() => {
+	console.log(state)
+}, 2000)
