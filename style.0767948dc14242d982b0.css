@@ -262,6 +262,8 @@ button:disabled {
 	text-transform: uppercase;
 	letter-spacing: var(--letter-spacing);
 	padding-bottom: 2px;
+	line-height: 15px;
+	transform: translateY(-2px);
 }
 
 .header-block--field,
@@ -434,6 +436,54 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 	background-image: linear-gradient(to top left, #dc999900 0%, #dc999900 calc(50% - 1px), #dc9999 50%, #dc999900 calc(50% + 1px), #dc999900 100%);
 }
 
+.column-error {
+	padding: var(--padding);
+	line-height: 1.4;
+}
+
+.column-error--title {
+	font-family: 'Montserrat', sans-serif;
+	font-weight: 600;
+	font-size: 12px;
+	letter-spacing: var(--letter-spacing);
+	line-height: 1.6;
+	text-transform: uppercase;
+}
+
+.column-error--description {
+	font-size: 16px;
+	color: #dc9999;
+	margin: 10px 0 8px;
+}
+
+.column-error a {
+	position: relative;
+	display: inline-block;
+	width: 100%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	color: inherit;
+	font-family: monospace;
+	text-decoration: none;
+}
+
+.column-error a:hover::after {
+	content: "";
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 21px;
+	right: 0;
+	height: 1px;
+	background: currentColor;
+}
+
+.column-error--details {
+	display: block;
+	margin-top: 8px;
+	color: #ffffff;
+}
+
 /* Remove scrollbar on Webkit/Blink browsers */
 .column::-webkit-scrollbar {
 	width: 0;
@@ -498,6 +548,10 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 
 .header-block:nth-child(5) {
 	animation-delay: 570ms;
+}
+
+body:not(.loaded) .columns {
+	overflow: hidden;
 }
 
 /* Animation delay: 500 + 30 * n */
