@@ -459,7 +459,7 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 .column-error a {
 	position: relative;
 	display: inline-block;
-	width: 100%;
+	max-width: 100%;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	color: inherit;
