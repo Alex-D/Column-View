@@ -39,7 +39,7 @@ const DEVICES = [
 
 type DisplayMode = 'single-page' | 'multi-page'
 type IconId = 'column-count' | 'screen-size' | 'url' | 'type'
-type LoadStatus = 'ok' | 'failed'
+type LoadStatus = 'ok' | 'unreachable'
 
 interface State {
 	displayMode: DisplayMode,
@@ -164,15 +164,30 @@ function updateHistory(state: State): void {
 }
 
 function checkUrl(state: State, index: number | null, url: string): void {
+	if (url === null) {
+		return
+	}
+
 	fetch(url, {
 		method: 'HEAD',
-	}).then(() => {
+	}).then((r) => {
+		console.log(r)
 		state.loadStatuses[index || 0] = 'ok'
 		render(state)
 	}).catch(() => {
-		state.loadStatuses[index || 0] = 'failed'
+		state.loadStatuses[index || 0] = 'unreachable'
 		render(state)
 	})
+}
+
+function checkAllUrls(): void {
+	if (state.displayMode === 'single-page') {
+		checkUrl(state, 0, state.url)
+	} else {
+		state.urls.forEach((url, index) => {
+			checkUrl(state, index, url)
+		})
+	}
 }
 
 const setColumnsCount = throttle((newColumnsCount: number): void => {
@@ -240,6 +255,8 @@ const onClickScreenSizeItem = (columnsWidth: number): void => {
 const onDisplayModeChange = (e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
 	state.displayMode = event.target.value as DisplayMode
+	state.loadStatuses = []
+	checkAllUrls()
 	updateHistory(state)
 	render(state)
 }
@@ -285,14 +302,15 @@ function renderError(url: string): VNode {
 	return h('div.column-error', [
 		h('div.column-error--title', 'Error'),
 		h('p.column-error--description', [
-			'Cannot load ',
+			'Cannot load',
+			h('br'),
 			h('a', {
 				attrs: {
 					href: url,
 					target: '_blank',
 				},
 			}, url),
-			h('span.column-error--details', 'This is usually due to a wrong URL or CORS issues.'),
+			h('span.column-error--details', 'Please check that the URL is correct.'),
 		]),
 	])
 }
@@ -304,7 +322,7 @@ function view(state: State): VNode {
 	const columns: VNode[] = [...Array<null>(state.columnsCount)].map((_, index) => {
 		const url = isSinglePageDisplayMode ? state.url : state.urls[index]
 		const urlLoadStatus = isSinglePageDisplayMode ? state.loadStatuses[0] : state.loadStatuses[index]
-		const isErrored = urlLoadStatus === 'failed'
+		const isErrored = urlLoadStatus === 'unreachable'
 
 		return h('div.column',
 			{
@@ -606,13 +624,6 @@ render(initState)
 
 setTimeout(() => {
 	document.body.classList.add('loaded')
+	checkAllUrls()
 	render(state)
-
-	if (state.displayMode === 'single-page') {
-		checkUrl(state, 0, state.url)
-	} else {
-		state.urls.forEach((url, index) => {
-			checkUrl(state, index, url)
-		})
-	}
 }, 1000)
