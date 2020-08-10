@@ -1,6 +1,6 @@
 {
 	"name": "column-view",
-	"version": "0.0.1",
+	"private": true,
 	"description": "See the mobile view of a webpage in multiple columns to get the whole page in a single view.",
 	"dependencies": {
 		"lodash-es": "^4.17.15",
@@ -43,5 +43,5 @@
 	"bugs": {
 		"url": "https://github.com/Alex-D/Column-View/issues"
 	},
-	"homepage": "https://github.com/Alex-D/Column-View#readme"
+	"homepage": "https://column-view.alex-d.fr"
 }
