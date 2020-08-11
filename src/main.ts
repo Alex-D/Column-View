@@ -57,7 +57,7 @@ interface State {
 }
 
 interface SupportsIframeResponse {
-	supportsIframes?: boolean
+	supportsIframe?: boolean
 	error?: string
 }
 
@@ -183,7 +183,7 @@ function checkUrl(state: State, index: number | null, url: string): void {
 			}
 
 			const jsonResponse: SupportsIframeResponse = await response.json()
-			state.loadStatuses[index || 0] = jsonResponse.supportsIframes ? 'ok' : 'blocked'
+			state.loadStatuses[index || 0] = jsonResponse.supportsIframe ? 'ok' : 'blocked'
 			render(state)
 		})
 		.catch(() => {
@@ -313,7 +313,7 @@ function getDeviceNameByWidth(width: number): string | undefined {
 function getErrorDetails(loadStatus: LoadStatus): string {
 	switch (loadStatus) {
 		case 'blocked':
-			return 'This domain does not allow iframes, which is needed to load it in Column View.'
+			return 'This domain does not allow to be loaded in an iframe, which is needed to work in Column View.'
 		case 'unreachable':
 			return 'Please check that the URL is correct.'
 	}
