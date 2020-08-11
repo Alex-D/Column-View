@@ -174,16 +174,22 @@ function checkUrl(state: State, index: number | null, url: string): void {
 		return
 	}
 
-	fetch(SUPPORTS_IFRAME_BASE_URL + url, {
-		method: 'GET',
-	}).then(async (response) => {
-		const jsonResponse: SupportsIframeResponse = await response.json()
-		state.loadStatuses[index || 0] = jsonResponse.supportsIframes ? 'ok' : 'blocked'
-		render(state)
-	}).catch(() => {
-		state.loadStatuses[index || 0] = 'unreachable'
-		render(state)
-	})
+	fetch(SUPPORTS_IFRAME_BASE_URL + url)
+		.then(async (response) => {
+			if (!response.ok) {
+				state.loadStatuses[index || 0] = 'unreachable'
+				render(state)
+				return
+			}
+
+			const jsonResponse: SupportsIframeResponse = await response.json()
+			state.loadStatuses[index || 0] = jsonResponse.supportsIframes ? 'ok' : 'blocked'
+			render(state)
+		})
+		.catch(() => {
+			state.loadStatuses[index || 0] = 'unreachable'
+			render(state)
+		})
 }
 
 function checkAllUrls(): void {
