@@ -7,6 +7,7 @@ import {VNode} from 'snabbdom/src/package/vnode'
 import {throttle} from 'lodash-es'
 import {v4 as uuid} from 'uuid'
 
+const SUPPORTS_IFRAME_BASE_URL = 'https://supports-iframe.herokuapp.com/'
 const DEFAULT_DISPLAY_MODE = 'single-page'
 const DEFAULT_COLUMNS_COUNT = 5
 const MIN_COLUMNS_COUNT = 1
@@ -39,20 +40,25 @@ const DEVICES = [
 
 type DisplayMode = 'single-page' | 'multi-page'
 type IconId = 'column-count' | 'screen-size' | 'url' | 'type'
-type LoadStatus = 'ok' | 'unreachable'
+type LoadStatus = 'ok' | 'blocked' | 'unreachable'
 
 interface State {
-	displayMode: DisplayMode,
-	url: string,
-	urls: string[],
-	loadStatuses: LoadStatus[],
-	columnsCount: number,
-	columnsWidth: number,
-	columnWidthCharCount: number,
-	columnsHeight: number,
-	scrollTop: number,
-	hasNavColumn: boolean,
-	loadedIframeIds: Set<string>,
+	displayMode: DisplayMode
+	url: string
+	urls: string[]
+	loadStatuses: LoadStatus[]
+	columnsCount: number
+	columnsWidth: number
+	columnWidthCharCount: number
+	columnsHeight: number
+	scrollTop: number
+	hasNavColumn: boolean
+	loadedIframeIds: Set<string>
+}
+
+interface SupportsIframeResponse {
+	supportsIframes?: boolean
+	error?: string
 }
 
 interface DOMEvent<T extends EventTarget> extends Event {
@@ -164,15 +170,15 @@ function updateHistory(state: State): void {
 }
 
 function checkUrl(state: State, index: number | null, url: string): void {
-	if (url === null) {
+	if (url === null || url.trim().length === 0) {
 		return
 	}
 
-	fetch(url, {
-		method: 'HEAD',
-	}).then((r) => {
-		console.log(r)
-		state.loadStatuses[index || 0] = 'ok'
+	fetch(SUPPORTS_IFRAME_BASE_URL + url, {
+		method: 'GET',
+	}).then(async (response) => {
+		const jsonResponse: SupportsIframeResponse = await response.json()
+		state.loadStatuses[index || 0] = jsonResponse.supportsIframes ? 'ok' : 'blocked'
 		render(state)
 	}).catch(() => {
 		state.loadStatuses[index || 0] = 'unreachable'
@@ -298,7 +304,18 @@ function getDeviceNameByWidth(width: number): string | undefined {
 	return device.name
 }
 
-function renderError(url: string): VNode {
+function getErrorDetails(loadStatus: LoadStatus): string {
+	switch (loadStatus) {
+		case 'blocked':
+			return 'This domain does not allow iframes, which is needed to load it in Column View.'
+		case 'unreachable':
+			return 'Please check that the URL is correct.'
+	}
+
+	return ''
+}
+
+function renderError(url: string, loadStatus: LoadStatus): VNode {
 	return h('div.column-error', [
 		h('div.column-error--title', 'Error'),
 		h('p.column-error--description', [
@@ -310,7 +327,7 @@ function renderError(url: string): VNode {
 					target: '_blank',
 				},
 			}, url),
-			h('span.column-error--details', 'Please check that the URL is correct.'),
+			h('span.column-error--details', getErrorDetails(loadStatus)),
 		]),
 	])
 }
@@ -322,7 +339,7 @@ function view(state: State): VNode {
 	const columns: VNode[] = [...Array<null>(state.columnsCount)].map((_, index) => {
 		const url = isSinglePageDisplayMode ? state.url : state.urls[index]
 		const urlLoadStatus = isSinglePageDisplayMode ? state.loadStatuses[0] : state.loadStatuses[index]
-		const isErrored = urlLoadStatus === 'unreachable'
+		const isErrored = ['blocked', 'unreachable'].includes(urlLoadStatus)
 
 		return h('div.column',
 			{
@@ -370,7 +387,7 @@ function view(state: State): VNode {
 							onIframeLoad(state, index, e)
 						},
 					},
-				}) : (isErrored ? renderError(url) : null),
+				}) : (isErrored ? renderError(url, urlLoadStatus) : null),
 			],
 		)
 	})
@@ -385,17 +402,19 @@ function view(state: State): VNode {
 		})
 
 		// Add nav column
+		const urlLoadStatus = state.loadStatuses[0]
+		const isErrored = ['blocked', 'unreachable'].includes(urlLoadStatus)
 		columns.unshift(
 			h('div.column.nav-column',
 				[
 					h('div.nav-column--container', [
-						h(`iframe`, {
+						state.url && !isErrored ? h(`iframe`, {
 							attrs: {
 								src: state.url,
 								frameborder: '0',
 								scrolling: 'no',
 							},
-						}),
+						}): null,
 						h('div.nav-column--placeholders', navColumnPlaceholders),
 					]),
 				],
