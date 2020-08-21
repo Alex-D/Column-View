@@ -5,9 +5,6 @@ module.exports = {
 		browser: true,
 		es6: true,
 	},
-	globals: {
-		'PRODUCTION': 'readonly',
-	},
 	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/eslint-recommended',
