@@ -206,12 +206,6 @@ const setColumnsCount = throttle((newColumnsCount: number): void => {
 	state.columnsCount = newColumnsCount
 	updateHistory(state)
 	render(state)
-
-	// Avoid outline on current activeElement without breaking accessibility
-	const activeElement: Element | null = document.activeElement
-	if (activeElement !== null) {
-		(activeElement as HTMLElement).blur()
-	}
 }, 100)
 
 const onUrlChange = throttle((state: State, index: number | null, e: Event): void => {
@@ -266,6 +260,7 @@ const onClickScreenSizeItem = (columnsWidth: number): void => {
 
 const onDisplayModeChange = (e: Event): void => {
 	const event = e as DOMEvent<HTMLInputElement>
+	event.target.blur()
 	state.displayMode = event.target.value as DisplayMode
 	state.loadStatuses = []
 	checkAllUrls()
@@ -560,14 +555,26 @@ function view(state: State): VNode {
 					h('div.header-block--title', 'Column count'),
 					h('div.header-block--field', [
 						h('button', {
-							// @ts-ignore: Wrong typing in Snabbdom lib
-							on: {click: [setColumnsCount, state.columnsCount - 1]},
+							on: {
+								click: (e: Event) => {
+									const event = e as DOMEvent<HTMLInputElement>
+									event.target.blur()
+
+									setColumnsCount(state.columnsCount - 1)
+								},
+							},
 							attrs: {disabled: state.columnsCount <= MIN_COLUMNS_COUNT},
 						}, '−'),
 						h('span.column-count', state.columnsCount),
 						h('button', {
-							// @ts-ignore: Wrong typing in Snabbdom lib
-							on: {click: [setColumnsCount, state.columnsCount + 1]},
+							on: {
+								click: (e: Event) => {
+									const event = e as DOMEvent<HTMLInputElement>
+									event.target.blur()
+
+									setColumnsCount(state.columnsCount + 1)
+								},
+							},
 							attrs: {disabled: state.columnsCount >= MAX_COLUMNS_COUNT},
 						}, '+'),
 					]),
