@@ -144,7 +144,7 @@ button:disabled {
 	z-index: 1;
 	opacity: 0;
 	pointer-events: none;
-	transition: 150ms opacity;
+	transition: 300ms opacity;
 }
 
 .header-logo:hover + .header-logo--details,
@@ -163,6 +163,10 @@ button:disabled {
 
 .header-block__logo:hover .header-logo--overlay {
 	opacity: 0.7;
+}
+
+.header-block__logo:hover ~ .header-block {
+	z-index: 0;
 }
 
 .header-logo--details a {
@@ -379,6 +383,13 @@ input:checked + .header-switch--item {
 	font-size: 16px;
 }
 
+header:focus-within .header-block:not(:focus-within),
+header:focus-within + .columns {
+	opacity: 0.3;
+	pointer-events: none;
+	transition: opacity 300ms ease 180ms !important;
+}
+
 .columns {
 	display: grid;
 	grid-template-columns: 100px repeat(var(--columns-count), var(--columns-width)) 0.1px; /* 0.1px is for the last column padding-right fix */
@@ -530,7 +541,7 @@ body:not(.macos) .columns::-webkit-scrollbar-thumb:active {
 }
 
 .header-block {
-	animation: fadeIn 350ms both;
+	animation: fadeIn 350ms backwards;
 	animation-delay: 450ms;
 }
 
