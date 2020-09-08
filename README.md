@@ -28,7 +28,9 @@ Column view is a tool that helps you view the mobile version of your website dir
       <strong>Adrien Gervaix</strong><br>
       <em>Concept & Design</em><br>
       &bull; &bull; &bull;<br>
-      https://twitter.com/adriengervaix
+      <a href="https://twitter.com/adriengervaix">
+        twitter.com/adriengervaix
+      </a>
     </td>
     <td align="center" width="50%">
       <a href="https://github.com/Alex-D">
@@ -38,7 +40,9 @@ Column view is a tool that helps you view the mobile version of your website dir
       <strong>Alexandre Demode</strong><br>
       <em>Development</em><br>
       &bull; &bull; &bull;<br>
-      https://twitter.com/AlexandreDemode
+      <a href="https://twitter.com/AlexandreDemode">
+        twitter.com/AlexandreDemode
+      </a>
     </td>
   </tr>
 </tbody>
