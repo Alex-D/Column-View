@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://column-view.alex-d.fr">
+  <a href="https://column-view.com">
     <img src=".github/logo.svg" alt="Column View" width="70%">
   </a>
 </p>
@@ -12,7 +12,7 @@
 
 Column view is a tool that helps you view the mobile version of your website directly in multiple columns or helps you check multiple pages at once.
 
-[Visit Column View website](https://column-view.alex-d.fr)
+[Visit Column View website](https://column-view.com)
 
 
 ## Authors

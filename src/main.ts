@@ -447,7 +447,7 @@ function view(state: State): VNode {
 				]),
 				h('div.header-logo--details', [
 					h('p', [
-						'Column view is a tool that helps you view the mobile version of your website directly in multiple columns or helps you check multiple pages at once.',
+						'Column View helps you view the mobile version of your website directly in multiple columns or helps you check multiple pages at once.',
 					]),
 					h('div', [
 						'Design',
