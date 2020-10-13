@@ -47,6 +47,7 @@ const config = {
 		}),
 		new CopyPlugin({
 			patterns: [
+				{ from: './src/favicon.png' },
 				{ from: './src/opengraph.png' },
 			],
 		}),
