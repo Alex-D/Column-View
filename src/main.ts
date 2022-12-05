@@ -7,7 +7,7 @@ import {VNode} from 'snabbdom/src/package/vnode'
 import {throttle} from 'lodash-es'
 import {v4 as uuid} from 'uuid'
 
-const SUPPORTS_IFRAME_BASE_URL = 'https://supports-iframe.herokuapp.com/'
+const SUPPORTS_IFRAME_BASE_URL = 'https://supports-iframe.vercel.app/api?url='
 const DEFAULT_DISPLAY_MODE = 'single-page'
 const DEFAULT_COLUMNS_COUNT = 5
 const MIN_COLUMNS_COUNT = 1
