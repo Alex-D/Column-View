@@ -382,7 +382,7 @@ function view(state: State): VNode {
 						id: uuid(),
 						frameborder: '0',
 						scrolling: 'no',
-						sandbox: 'allow-forms allow-scripts',
+						sandbox: 'allow-forms allow-scripts allow-same-origin',
 					},
 					on: {
 						load: (e: Event) => {
